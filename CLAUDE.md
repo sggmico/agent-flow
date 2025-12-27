@@ -391,4 +391,80 @@ NEXT_PUBLIC_APP_URL=       # 应用 URL
 
 ---
 
+## 编码规范
+
+### 命名约定
+
+| 类型 | 规范 | 示例 |
+|------|------|------|
+| 变量/函数 | camelCase | `getUserData`, `isActive` |
+| 常量 | UPPER_SNAKE_CASE | `API_URL`, `MAX_RETRY` |
+| 组件/类 | PascalCase | `AgentCard`, `WorkflowEditor` |
+| 文件名 | kebab-case | `agent-card.tsx`, `use-agents.ts` |
+| Hooks | use前缀 + camelCase | `useAgents`, `useWorkflow` |
+
+### 代码风格（Biome 强制）
+
+- **缩进**：2 空格
+- **行宽**：100 字符
+- **引号**：单引号（JS/TS），双引号（JSX）
+- **分号**：必须
+- **尾随逗号**：必须
+
+### React 组件规范
+
+**组件结构顺序**：
+```typescript
+// 1. imports
+// 2. types/interfaces
+// 3. component definition
+//   3.1 hooks (固定顺序)
+//   3.2 event handlers
+//   3.3 早期返回（loading/error）
+//   3.4 JSX
+```
+
+**强制规则**：
+- 函数组件优先，使用 `React.FC` 或省略
+- Props 必须用 `interface` 定义（支持 extends）
+- 事件处理函数前缀 `handle`：`handleSubmit`, `handleClick`
+- 列表渲染必须有唯一 `key`（禁止用 index）
+- 避免内联对象/函数定义（使用 `useMemo`/`useCallback`）
+
+**Hooks 规则**：
+- 固定顺序：状态 → 副作用 → 自定义 hooks
+- `useEffect` 必须明确依赖项
+- 避免 `useEffect` 中的副作用（首选 `useMutation`）
+
+### TypeScript 严格规范
+
+- **禁止 `any`**：除非特殊情况（需注释说明）
+- **优先类型推导**：简单类型不需显式声明
+- **API 类型**：所有 API 请求/响应用 Zod schema 验证
+- **数据库类型**：Drizzle 自动推导，禁止手写
+- **事件类型**：使用 React 内置类型（`React.MouseEvent<HTMLButtonElement>`）
+
+### 性能优化
+
+- 大列表使用虚拟滚动（`@tanstack/react-virtual`）
+- 路由级别懒加载：`const Page = lazy(() => import('./Page'))`
+- 图片使用 Next.js `<Image>`，启用优化
+- 避免过度 memo（仅用于昂贵计算/复杂组件）
+
+### 测试要求
+
+- **覆盖率**：`packages/shared/` ≥80%，关键业务逻辑 100%
+- **命名**：`describe('组件/功能', () => it('应该...', ...)`（中文描述）
+- **文件位置**：`__tests__/` 或 `.test.ts` 后缀
+
+### 禁止事项
+
+- ❌ 在 `apps/web/` 中编写业务逻辑（应放 `packages/shared/`）
+- ❌ 使用 `moment`（用 `date-fns`）
+- ❌ 使用 `lodash`（用 `lodash-es` 或原生方法）
+- ❌ 在 render 中定义组件
+- ❌ 解构 reactive 对象（会失去响应性）
+
+---
+
 **最后更新**：2024-12-27
