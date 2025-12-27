@@ -10,7 +10,12 @@
     "check:fix": "biome check --write .",
     "type-check": "pnpm -r type-check",
     "test": "vitest",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "wt": "./scripts/worktree.sh",
+    "wt:add": "./scripts/worktree.sh add",
+    "wt:rm": "./scripts/worktree.sh remove",
+    "wt:ls": "./scripts/worktree.sh list",
+    "wt:clean": "./scripts/worktree.sh clean"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

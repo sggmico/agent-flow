@@ -1,0 +1,119 @@
+# Git Worktree 管理脚本
+
+用于 Agent Flow 项目的多 AI 并行开发。
+
+## 快速开始
+
+### 使用 npm scripts（推荐）
+
+```bash
+# 创建 claude-code 的 worktree
+pnpm wt:add claude
+
+# 创建 gemini-cli 的 worktree
+pnpm wt:add gemini
+
+# 列出所有 worktree
+pnpm wt:ls
+
+# 删除 worktree
+pnpm wt:rm claude
+```
+
+### 直接使用脚本
+
+```bash
+./scripts/worktree.sh add claude
+./scripts/worktree.sh list
+```
+
+## 工作流程
+
+### 1. 为每个 AI 创建独立工作区
+
+```bash
+./scripts/worktree.sh add claude
+# → 创建 agent-flow-claude/ 目录
+# → 创建 dev/claude 分支
+# → 从 main 分支检出
+
+cd ../agent-flow-claude
+# 现在可以在这里使用 claude-code 工作
+```
+
+### 2. 多个 AI 并行工作
+
+```bash
+# Terminal 1: Claude Code
+cd agent-flow-claude
+claude-code
+
+# Terminal 2: Gemini CLI
+cd agent-flow-gemini
+gemini-cli
+
+# Terminal 3: Codex
+cd agent-flow-codex
+codex
+```
+
+### 3. 合并工作成果
+
+```bash
+# 在主目录
+cd agent-flow
+
+# 查看 claude 的改动
+git diff main..dev/claude
+
+# 合并 claude 的工作
+git merge dev/claude
+
+# 推送到远程
+git push origin main
+```
+
+## 完整命令
+
+| npm script              | 脚本命令                              | 说明             |
+| ----------------------- | --------------------------------- | -------------- |
+| `pnpm wt:add <ai>`      | `./scripts/worktree.sh add <ai>`  | 创建新的 worktree  |
+| `pnpm wt:rm <ai>`       | `./scripts/worktree.sh remove`    | 删除指定的 worktree |
+| `pnpm wt:ls`            | `./scripts/worktree.sh list`      | 列出所有 worktree  |
+| `pnpm wt:clean`         | `./scripts/worktree.sh clean`     | 清理所有 worktree  |
+| `pnpm wt help`          | `./scripts/worktree.sh help`      | 显示帮助信息         |
+
+## 目录结构
+
+```
+ws/cc/agent-flow-ws/
+├── agent-flow/          # 主工作目录 (main 分支)
+├── agent-flow-claude/   # Claude Code 工作区 (dev/claude 分支)
+├── agent-flow-gemini/   # Gemini CLI 工作区 (dev/gemini 分支)
+└── agent-flow-codex/    # Codex 工作区 (dev/codex 分支)
+```
+
+## 注意事项
+
+1. **依赖安装**：每个 worktree 共享 `.git` 目录，但 `node_modules` 需要分别安装
+   ```bash
+   cd ../agent-flow-claude
+   pnpm install
+   ```
+
+2. **环境变量**：每个 worktree 可以有独立的 `.env` 文件
+
+3. **分支管理**：所有 dev/* 分支都是从 main 创建的，定期同步 main 分支：
+   ```bash
+   git fetch origin main
+   git rebase origin/main
+   ```
+
+4. **清理 worktree**：删除 worktree 前确保已提交或备份重要改动
+
+## 最佳实践
+
+- 🎯 **功能分离**：让不同 AI 负责不同的功能模块
+- 🔄 **定期合并**：及时将完成的功能合并回 main
+- 🧹 **定期清理**：删除不再使用的 worktree 节省磁盘空间
+- 📝 **清晰命名**：使用有意义的 AI 名称（如 `claude-db`、`gemini-ui`）
