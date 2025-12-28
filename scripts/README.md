@@ -18,17 +18,19 @@ chmod +x scripts/worktree.sh
 ### 使用 npm scripts（推荐）
 
 ```bash
-# 创建 claude-code 的 worktree
+# 创建 worktree（支持批量）
 pnpm wt:add claude
+pnpm wt:add claude gemini codex gpt4
 
-# 创建 gemini-cli 的 worktree
-pnpm wt:add gemini
+# 删除 worktree（支持批量）
+pnpm wt:rm claude
+pnpm wt:rm claude gemini codex
 
 # 列出所有 worktree
 pnpm wt:ls
 
-# 删除 worktree
-pnpm wt:rm claude
+# 查看共享文件状态
+pnpm wt:st
 ```
 
 ### 直接使用脚本
@@ -86,14 +88,14 @@ git push origin main
 
 ## 完整命令
 
-| npm script              | 脚本命令                              | 说明                 |
-| ----------------------- | --------------------------------- | ------------------ |
-| `pnpm wt:add <ai>`      | `./scripts/worktree.sh add <ai>`  | 创建新的 worktree      |
-| `pnpm wt:rm <ai>`       | `./scripts/worktree.sh remove`    | 删除指定的 worktree     |
-| `pnpm wt:ls`            | `./scripts/worktree.sh list`      | 列出所有 worktree      |
-| `pnpm wt:st`            | `./scripts/worktree.sh status`    | 显示共享文件状态         |
-| `pnpm wt:clean`         | `./scripts/worktree.sh clean`     | 清理所有 worktree      |
-| `pnpm wt help`          | `./scripts/worktree.sh help`      | 显示帮助信息           |
+| npm script        | 脚本命令                           | 说明                |
+| ----------------- | ------------------------------ | ----------------- |
+| `pnpm wt:add ...` | `./scripts/worktree.sh add`    | 创建 worktree（支持批量） |
+| `pnpm wt:rm ...`  | `./scripts/worktree.sh remove` | 删除 worktree（支持批量） |
+| `pnpm wt:ls`      | `./scripts/worktree.sh list`   | 列出所有 worktree     |
+| `pnpm wt:st`      | `./scripts/worktree.sh status` | 显示共享文件状态          |
+| `pnpm wt:clean`   | `./scripts/worktree.sh clean`  | 清理所有 worktree     |
+| `pnpm wt help`    | `./scripts/worktree.sh help`   | 显示帮助              |
 
 ## 目录结构
 
