@@ -20,6 +20,7 @@
     "wt:add": "./scripts/worktree.sh add",
     "wt:rm": "./scripts/worktree.sh remove",
     "wt:ls": "./scripts/worktree.sh list",
+    "wt:st": "./scripts/worktree.sh status",
     "wt:clean": "./scripts/worktree.sh clean"
   },
   "devDependencies": {

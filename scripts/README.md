@@ -2,6 +2,17 @@
 
 用于 Agent Flow 项目的多 AI 并行开发。
 
+## 初始化
+
+首次使用需复制模板：
+
+```bash
+cp scripts/worktree.sh.example scripts/worktree.sh
+chmod +x scripts/worktree.sh
+```
+
+> `worktree.sh` 已被 gitignore，可自由定制
+
 ## 快速开始
 
 ### 使用 npm scripts（推荐）
@@ -75,13 +86,14 @@ git push origin main
 
 ## 完整命令
 
-| npm script              | 脚本命令                              | 说明             |
-| ----------------------- | --------------------------------- | -------------- |
-| `pnpm wt:add <ai>`      | `./scripts/worktree.sh add <ai>`  | 创建新的 worktree  |
-| `pnpm wt:rm <ai>`       | `./scripts/worktree.sh remove`    | 删除指定的 worktree |
-| `pnpm wt:ls`            | `./scripts/worktree.sh list`      | 列出所有 worktree  |
-| `pnpm wt:clean`         | `./scripts/worktree.sh clean`     | 清理所有 worktree  |
-| `pnpm wt help`          | `./scripts/worktree.sh help`      | 显示帮助信息         |
+| npm script              | 脚本命令                              | 说明                 |
+| ----------------------- | --------------------------------- | ------------------ |
+| `pnpm wt:add <ai>`      | `./scripts/worktree.sh add <ai>`  | 创建新的 worktree      |
+| `pnpm wt:rm <ai>`       | `./scripts/worktree.sh remove`    | 删除指定的 worktree     |
+| `pnpm wt:ls`            | `./scripts/worktree.sh list`      | 列出所有 worktree      |
+| `pnpm wt:st`            | `./scripts/worktree.sh status`    | 显示共享文件状态         |
+| `pnpm wt:clean`         | `./scripts/worktree.sh clean`     | 清理所有 worktree      |
+| `pnpm wt help`          | `./scripts/worktree.sh help`      | 显示帮助信息           |
 
 ## 目录结构
 
@@ -93,6 +105,21 @@ ws/cc/agent-flow-ws/
 └── agent-flow-codex/    # Codex 工作区 (dev/codex 分支)
 ```
 
+## 配置共享机制
+
+创建 worktree 时，以下文件/目录会**自动创建软链接**，所有 worktree 共享同一份配置：
+
+- `.env` - 环境变量配置
+- `.claude/settings.local.json` - Claude Code 设置
+- `docs/*_local/` - 本地文档目录
+
+**优点**：修改任意 worktree 中的共享文件，其他 worktree 自动同步
+
+**查看状态**：
+```bash
+pnpm wt:st  # 查看所有共享文件的链接状态
+```
+
 ## 注意事项
 
 1. **依赖安装**：每个 worktree 共享 `.git` 目录，但 `node_modules` 需要分别安装
@@ -101,7 +128,7 @@ ws/cc/agent-flow-ws/
    pnpm install
    ```
 
-2. **环境变量**：每个 worktree 可以有独立的 `.env` 文件
+2. **共享配置**：`.env` 等配置文件通过软链接共享，修改一处全部同步
 
 3. **分支管理**：所有 dev/* 分支都是从 main 创建的，定期同步 main 分支：
    ```bash

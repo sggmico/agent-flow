@@ -51,6 +51,9 @@ yarn-error.log*
 # Private documentation and research
 *local*
 
+# Personal scripts
+scripts/worktree.sh
+
 # Logs
 logs/
 *.log
