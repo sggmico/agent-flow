@@ -11,6 +11,11 @@
     "type-check": "pnpm -r type-check",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
+    "db:generate": "pnpm -F @agent-flow/database db:generate",
+    "db:migrate": "pnpm -F @agent-flow/database db:migrate",
+    "db:push": "pnpm -F @agent-flow/database db:push",
+    "db:studio": "pnpm -F @agent-flow/database db:studio",
+    "db:test": "tsx --env-file=.env scripts/test-db.ts",
     "wt": "./scripts/worktree.sh",
     "wt:add": "./scripts/worktree.sh add",
     "wt:rm": "./scripts/worktree.sh remove",
@@ -19,6 +24,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "tsx": "^4.21.0",
     "typescript": "^5.7.2"
   },
   "engines": {
