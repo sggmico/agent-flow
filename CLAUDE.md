@@ -15,6 +15,7 @@
 ## 技术栈
 
 ### 前端
+
 - **框架**：Next.js 15 (App Router)
 - **语言**：TypeScript 5.x
 - **UI**：Tailwind CSS + shadcn/ui
@@ -23,6 +24,7 @@
 - **实时通信**：Server-Sent Events (SSE) via Vercel AI SDK
 
 ### 后端与数据
+
 - **数据库**：PostgreSQL 16+ (含 pgvector 扩展)
 - **ORM**：Drizzle ORM (类型安全，零运行时开销)
 - **向量搜索**：pgvector (嵌入在 PostgreSQL 中)
@@ -31,11 +33,13 @@
 - **队列**：BullMQ (基于 Redis)
 
 ### AI 引擎
+
 - **框架**：Mastra (TypeScript 原生 agent 框架)
 - **LLM**：Claude Sonnet 4 (主要)、GPT-4o、Gemini 2.0 Flash
 - **Embeddings**：OpenAI text-embedding-3-large
 
 ### 工具链
+
 - **包管理器**：pnpm
 - **Monorepo**：pnpm workspace
 - **Linter/Formatter**：Biome (替代 ESLint + Prettier)
@@ -119,21 +123,25 @@ agent-flow/
 ## 核心领域模型
 
 ### Agent
+
 - **用途**：表示具有特定角色和能力的 AI agent
 - **关键字段**：`id`、`name`、`role`、`model`、`systemPrompt`、`tools`、`status`
 - **状态**：idle → working → completed/failed
 
 ### Workflow
+
 - **用途**：定义多步骤 agent 协作流程
 - **关键字段**：`id`、`name`、`steps[]`、`trigger`
 - **执行模式**：串行、并行、条件、循环
 
 ### CodeEmbedding
+
 - **用途**：存储向量化的代码块用于语义搜索
 - **关键字段**：`filePath`、`codeChunk`、`embedding` (1536 维向量)、`metadata`
 - **索引**：embedding 列上的 HNSW 索引，实现 10-30ms 查询性能
 
 ### Execution
+
 - **用途**：跟踪工作流执行状态和结果
 - **关键字段**：`workflowId`、`status`、`input`、`output`、`steps[]`
 - **生命周期**：pending → running → completed/failed/cancelled
@@ -197,15 +205,15 @@ pnpm -F @agent-flow/shared build  # 构建共享包
 
 ```typescript
 // 定义 schema (packages/database/schema/agents.ts)
-import { pgTable, serial, text, timestamp, vector } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, vector } from "drizzle-orm/pg-core";
 
-export const agents = pgTable('agents', {
-  id: serial('id').primaryKey(),
-  name: text('name').notNull(),
-  role: text('role').notNull(),
-  model: text('model').notNull(),
-  status: text('status').default('idle'),
-  createdAt: timestamp('created_at').defaultNow(),
+export const agents = pgTable("agents", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  role: text("role").notNull(),
+  model: text("model").notNull(),
+  status: text("status").default("idle"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // 查询时完全类型安全
@@ -238,7 +246,7 @@ CREATE INDEX ON code_embeddings USING hnsw (embedding vector_cosine_ops);
 
 ```typescript
 // Drizzle + pgvector 语义搜索
-import { sql } from 'drizzle-orm';
+import { sql } from "drizzle-orm";
 
 const results = await db.execute(sql`
   SELECT *, 1 - (embedding <=> ${queryVector}::vector) as similarity
@@ -258,9 +266,11 @@ const results = await db.execute(sql`
 // app/api/agents/route.ts
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const page = Number(searchParams.get('page')) || 1;
+  const page = Number(searchParams.get("page")) || 1;
 
-  const agents = await db.select().from(agentsTable)
+  const agents = await db
+    .select()
+    .from(agentsTable)
     .limit(10)
     .offset((page - 1) * 10);
 
@@ -280,7 +290,10 @@ export async function POST(req: Request) {
 
 ```typescript
 // app/api/workflows/[id]/stream/route.ts
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({
@@ -296,9 +309,9 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
   return new Response(stream, {
     headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
     },
   });
 }
@@ -309,16 +322,19 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 ## 代码质量标准
 
 ### 类型安全
+
 - 所有数据库查询必须使用 Drizzle ORM (除 pgvector 外不使用原始 SQL)
 - API 请求/响应体必须使用 Zod schemas 验证
 - 禁止使用 `any` 类型，除非特殊情况（必须注释说明）
 
 ### 测试要求
+
 - 单元测试覆盖率：`packages/shared/` 和 services ≥80%
 - 所有 API 端点需要集成测试
 - 关键用户流程需要 E2E 测试（agent 创建、workflow 执行）
 
 ### 性能目标
+
 - API 响应时间 (P95)：<200ms
 - 向量搜索 (Top-10)：<30ms
 - 页面加载 (FCP)：<1.5s
@@ -329,9 +345,11 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 ## 多端策略
 
 ### Phase 1: Web (MVP)
+
 专注于 `apps/web/` 的 Next.js 开发。所有业务逻辑必须放在 `packages/shared/` 以支持未来平台扩展。
 
 ### Phase 2: Desktop + 扩展
+
 - **Desktop**：Tauri 应用包装 React UI (90% 代码复用)
 - **VS Code**：扩展使用 `packages/shared/` 的所有逻辑
 - **CLI**：Node.js 工具，100% 复用共享包
@@ -375,6 +393,37 @@ GOOGLE_API_KEY=            # 用于 Gemini (可选)
 
 # Next.js
 NEXT_PUBLIC_APP_URL=       # 应用 URL
+
+# GitHub 集成
+NEXT_PUBLIC_GITHUB_REPO=   # GitHub 仓库路径 (格式: owner/repo)
+GITHUB_TOKEN=              # GitHub Personal Access Token (可选，提高 API 限制)
+```
+
+---
+
+## 环境变量管理规范
+
+**唯一配置源原则**：所有环境变量统一在根目录 `/.env.example` 管理，禁止在 `apps/*` 中创建 `.env` 或 `.env.example`。
+
+### 核心规则
+
+```bash
+/.env.example  ✅ 唯一模板（提交到 Git）
+/.env          ✅ 本地配置（.gitignore）
+apps/*/.env*   ❌ 禁止创建（避免配置覆盖和分散）
+```
+
+### 命名规范
+
+- 服务端：`DATABASE_URL`, `REDIS_URL`
+- 客户端：`NEXT_PUBLIC_*`（Next.js 约定）
+- 密钥：`*_KEY`, `*_TOKEN` 后缀
+
+### 验证规范
+
+```bash
+# 检查违规文件（应输出为空）
+find apps -name ".env*" -type f
 ```
 
 ---
@@ -395,13 +444,13 @@ NEXT_PUBLIC_APP_URL=       # 应用 URL
 
 ### 命名约定
 
-| 类型 | 规范 | 示例 |
-|------|------|------|
-| 变量/函数 | camelCase | `getUserData`, `isActive` |
-| 常量 | UPPER_SNAKE_CASE | `API_URL`, `MAX_RETRY` |
-| 组件/类 | PascalCase | `AgentCard`, `WorkflowEditor` |
-| 文件名 | kebab-case | `agent-card.tsx`, `use-agents.ts` |
-| Hooks | use前缀 + camelCase | `useAgents`, `useWorkflow` |
+| 类型      | 规范                 | 示例                              |
+| --------- | -------------------- | --------------------------------- |
+| 变量/函数 | camelCase            | `getUserData`, `isActive`         |
+| 常量      | UPPER_SNAKE_CASE     | `API_URL`, `MAX_RETRY`            |
+| 组件/类   | PascalCase           | `AgentCard`, `WorkflowEditor`     |
+| 文件名    | kebab-case           | `agent-card.tsx`, `use-agents.ts` |
+| Hooks     | use 前缀 + camelCase | `useAgents`, `useWorkflow`        |
 
 ### 代码风格（Biome 强制）
 
@@ -414,6 +463,7 @@ NEXT_PUBLIC_APP_URL=       # 应用 URL
 ### React 组件规范
 
 **组件结构顺序**：
+
 ```typescript
 // 1. imports
 // 2. types/interfaces
@@ -425,6 +475,7 @@ NEXT_PUBLIC_APP_URL=       # 应用 URL
 ```
 
 **强制规则**：
+
 - 函数组件优先，使用 `React.FC` 或省略
 - Props 必须用 `interface` 定义（支持 extends）
 - 事件处理函数前缀 `handle`：`handleSubmit`, `handleClick`
@@ -432,6 +483,7 @@ NEXT_PUBLIC_APP_URL=       # 应用 URL
 - 避免内联对象/函数定义（使用 `useMemo`/`useCallback`）
 
 **Hooks 规则**：
+
 - 固定顺序：状态 → 副作用 → 自定义 hooks
 - `useEffect` 必须明确依赖项
 - 避免 `useEffect` 中的副作用（首选 `useMutation`）
@@ -465,6 +517,18 @@ NEXT_PUBLIC_APP_URL=       # 应用 URL
 - ❌ 在 render 中定义组件
 - ❌ 解构 reactive 对象（会失去响应性）
 
+### 文档时间规范
+
+- 创建/修改 .md 文档时，必须更新时间为**当天日期**（格式：YYYY-MM-DD）
+- 涉及文档的字段：`最后更新`、`维护者`、变更历史中的日期
+- 示例：`**最后更新**: 2025-12-29`
+
 ---
 
-**最后更新**：2024-12-27
+## 开发偏好
+
+- ❌ 禁止自动运行 `pnpm dev` 预览（避免端口冲突）
+
+---
+
+**最后更新**：2025-12-29
