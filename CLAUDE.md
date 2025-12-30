@@ -403,27 +403,38 @@ GITHUB_TOKEN=              # GitHub Personal Access Token (可选，提高 API �
 
 ## 环境变量管理规范
 
-**唯一配置源原则**：所有环境变量统一在根目录 `/.env.example` 管理，禁止在 `apps/*` 中创建 `.env` 或 `.env.example`。
+**分层配置原则**：遵循 `docs/extend_local/005. Monorepo 环境变量分层规范.md`
 
 ### 核心规则
 
 ```bash
-/.env.example  ✅ 唯一模板（提交到 Git）
-/.env          ✅ 本地配置（.gitignore）
-apps/*/.env*   ❌ 禁止创建（避免配置覆盖和分散）
+/.env              ✅ 后端共享（DATABASE_URL, REDIS_URL, *_API_KEY）
+/.env.example      ✅ 全局模板（提交）
+apps/*/.env.local  ✅ App 私有（NEXT_PUBLIC_*, WEB_PORT）
+apps/*/.env.example ✅ App 模板（提交）
 ```
+
+### 分层模型
+
+| 层级 | 位置 | 用途 | 优先级 |
+|------|------|------|--------|
+| L0 | Docker/CI | 系统注入 | 最高 |
+| L1 | `/.env` | 后端共享 | 中 |
+| L2/L3 | `apps/web/.env.local` | App 私有 + Client | 高（覆盖 L1） |
 
 ### 命名规范
 
-- 服务端：`DATABASE_URL`, `REDIS_URL`
-- 客户端：`NEXT_PUBLIC_*`（Next.js 约定）
-- 密钥：`*_KEY`, `*_TOKEN` 后缀
+- 后端共享：`DATABASE_URL`, `REDIS_URL`, `*_API_KEY`
+- App 私有：`WEB_PORT`, `ADMIN_PORT`
+- Client 暴露：`NEXT_PUBLIC_*`（仅在 app 层）
 
-### 验证规范
+### 技术实现
 
-```bash
-# 检查违规文件（应输出为空）
-find apps -name ".env*" -type f
+`apps/web/next.config.ts` 使用 dotenv 分层加载：
+
+```typescript
+config({ path: resolve(monorepoRoot, '.env') });           // L1
+config({ path: resolve(appRoot, '.env.local'), override: true }); // L2+L3
 ```
 
 ---
