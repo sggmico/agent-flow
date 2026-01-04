@@ -1,6 +1,6 @@
-import { defineConfig } from 'drizzle-kit';
+import { resolve } from 'node:path';
 import { config } from 'dotenv';
-import { resolve } from 'path';
+import { defineConfig } from 'drizzle-kit';
 
 // 加载根目录的 .env 文件
 config({ path: resolve(__dirname, '../../.env') });
