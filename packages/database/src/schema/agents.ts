@@ -1,10 +1,11 @@
+import { relations } from 'drizzle-orm';
 import { integer, jsonb, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
 import { users } from './users';
 
 /**
  * Agent 状态枚举
  */
-export const agentStatuses = ['idle', 'working', 'completed', 'failed'] as const;
+export const agentStatuses = ['idle', 'working', 'completed', 'failed', 'paused'] as const;
 export type AgentStatus = (typeof agentStatuses)[number];
 
 /**
@@ -47,6 +48,52 @@ export const agents = pgTable('agents', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+/**
+ * Agent 执行记录表
+ * 跟踪单个 Agent 的执行历史
+ */
+export const agentExecutions = pgTable('agent_executions', {
+  id: serial('id').primaryKey(),
+  // 关联
+  agentId: integer('agent_id')
+    .notNull()
+    .references(() => agents.id),
+  // 执行状态
+  status: text('status')
+    .$type<'pending' | 'running' | 'completed' | 'failed' | 'cancelled'>()
+    .default('pending'),
+  // 输入输出
+  input: jsonb('input'),
+  output: jsonb('output'),
+  error: text('error'),
+  // 执行元数据
+  model: text('model').notNull().$type<LlmModel>(), // 实际使用的模型
+  tokensUsed: integer('tokens_used'), // 消耗的 token 数
+  executionTime: integer('execution_time'), // 执行时间（毫秒）
+  // 时间戳
+  startedAt: timestamp('started_at').defaultNow(),
+  completedAt: timestamp('completed_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// 关系定义
+export const agentsRelations = relations(agents, ({ one, many }) => ({
+  creator: one(users, {
+    fields: [agents.createdBy],
+    references: [users.id],
+  }),
+  executions: many(agentExecutions),
+}));
+
+export const agentExecutionsRelations = relations(agentExecutions, ({ one }) => ({
+  agent: one(agents, {
+    fields: [agentExecutions.agentId],
+    references: [agents.id],
+  }),
+}));
+
 // 类型导出
 export type Agent = typeof agents.$inferSelect;
 export type NewAgent = typeof agents.$inferInsert;
+export type AgentExecution = typeof agentExecutions.$inferSelect;
+export type NewAgentExecution = typeof agentExecutions.$inferInsert;
