@@ -5,3 +5,6 @@
 
 // 导出 Redis 相关
 export { redis, cache, testRedisConnection, closeRedisConnection, CacheService } from './lib/redis';
+
+// 导出 Schemas
+export * from './schemas';
