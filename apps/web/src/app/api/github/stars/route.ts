@@ -1,9 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
 // GitHub 仓库配置
-const GITHUB_REPO = (
-  process.env.NEXT_PUBLIC_GITHUB_REPO || "yourusername/agent-flow"
-).replace(/\/+$/, "");
+const GITHUB_REPO = (process.env.NEXT_PUBLIC_GITHUB_REPO || 'yourusername/agent-flow').replace(
+  /\/+$/,
+  '',
+);
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
 interface GitHubRepoResponse {
@@ -16,7 +17,7 @@ export async function GET() {
   try {
     const url = `https://api.github.com/repos/${GITHUB_REPO}`;
     const headers: HeadersInit = {
-      Accept: "application/vnd.github.v3+json",
+      Accept: 'application/vnd.github.v3+json',
     };
 
     if (GITHUB_TOKEN) {
@@ -42,16 +43,16 @@ export async function GET() {
       watchers: data.watchers_count,
     });
   } catch (error) {
-    console.error("Failed to fetch GitHub stars:", error);
+    console.error('Failed to fetch GitHub stars:', error);
 
     return NextResponse.json(
       {
         stars: 0,
         forks: 0,
         watchers: 0,
-        error: "Failed to fetch GitHub data",
+        error: 'Failed to fetch GitHub data',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
