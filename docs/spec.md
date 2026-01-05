@@ -31,6 +31,7 @@ Agent Flow 是一个面向开发者的 **AI Agent 协作平台**，通过可视�
 - 📊 **实时监控**：执行过程可视化，状态实时反馈
 - 🔍 **代码理解**：基于向量搜索的智能代码问答
 - ✅ **质量保证**：内置代码审查、安全扫描等工具
+- 🧩 **可扩展能力**：Agent Skills 系统支持自定义工具和能力
 
 ---
 
@@ -196,6 +197,61 @@ Agent Flow 是一个面向开发者的 **AI Agent 协作平台**，通过可视�
 
 ---
 
+### 7. Agent Skills 系统
+
+**功能描述**：可复用、可组合、类型安全的 Agent 能力单元系统
+
+**核心概念**：
+- **Skill 定义**：明确的输入/输出接口、执行逻辑、权限和成本
+- **Skill Registry**：中央注册表，管理所有可用 Skills
+- **Skill Execution**：统一的执行引擎，包含验证、追踪、成本计算
+
+**核心能力**：
+- Skill 管理
+  - 内置 Skills（文件操作、代码分析、Git 操作、安全扫描）
+  - 自定义 Skills（用户可创建私有 Skills）
+  - Skill Marketplace（未来功能：公开分享和安装）
+
+- Agent-Skill 绑定
+  - Agent 创建时选择可用 Skills
+  - 多对多关系（一个 Agent 可用多个 Skills，一个 Skill 可被多个 Agent 使用）
+  - 优先级和配置覆盖
+
+- 执行追踪
+  - 记录每次 Skill 调用（输入、输出、耗时、成本）
+  - 成功率统计和错误分析
+  - 成本监控和优化建议
+
+**Skill 类型**：
+- `filesystem`：文件读写、目录遍历
+- `code`：代码解析、AST 分析、重构
+- `git`：Git 操作、Diff 分析、PR 管理
+- `api`：外部 API 调用、Webhook
+- `database`：数据库查询、数据同步
+- `shell`：Shell 命令执行
+- `other`：其他自定义类型
+
+**内置 Skills 示例**：
+- `file.read`：读取文件内容
+- `file.write`：写入文件
+- `code.parse`：解析代码 AST
+- `semgrep.scan`：Semgrep 安全扫描
+- `git.diff`：获取 Git Diff
+- `eslint.check`：ESLint 代码检查
+
+**用户界面**：
+- Skill 列表页面（按分类展示）
+- Skill 详情页（参数、返回值、使用示例、统计数据）
+- Agent 配置中的 Skill 选择器
+- Execution 日志中的 Skill 调用记录
+
+**技术实现**：
+- TypeScript 类型安全（Zod Schema 验证）
+- 数据库存储（skills, agent_skills, skill_executions 表）
+- OpenAI Function Calling 集成（Skill → OpenAI Tool 转换）
+
+---
+
 ## 🔌 API 规格
 
 ### Agent API
@@ -330,6 +386,196 @@ data: {"type":"complete","result":{...}}
 
 ---
 
+### Skills API
+
+#### 获取 Skills 列表
+
+```http
+GET /api/skills?category=filesystem&search=file
+
+Response 200:
+{
+  "data": [
+    {
+      "id": "skill_001",
+      "skillId": "file.read",
+      "name": "Read File",
+      "description": "Read content from a file",
+      "category": "filesystem",
+      "version": "1.0.0",
+      "isActive": true,
+      "usageCount": 1234
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 15
+  }
+}
+```
+
+#### 获取 Skill 详情
+
+```http
+GET /api/skills/:id
+
+Response 200:
+{
+  "id": "skill_001",
+  "skillId": "file.read",
+  "name": "Read File",
+  "description": "Read content from a file in the filesystem",
+  "category": "filesystem",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "path": { "type": "string", "description": "File path" },
+      "encoding": { "type": "string", "enum": ["utf8", "base64"], "default": "utf8" }
+    },
+    "required": ["path"]
+  },
+  "returns": {
+    "type": "object",
+    "properties": {
+      "content": { "type": "string" },
+      "size": { "type": "number" }
+    }
+  },
+  "permissions": ["filesystem:read"],
+  "estimatedCost": { "tokens": 0, "credits": 1 },
+  "version": "1.0.0",
+  "usageCount": 1234,
+  "createdAt": "2024-12-27T10:00:00Z"
+}
+```
+
+#### 创建自定义 Skill
+
+```http
+POST /api/skills
+Content-Type: application/json
+
+{
+  "skillId": "custom.validator",
+  "name": "Custom Validator",
+  "description": "Validate custom data format",
+  "category": "other",
+  "parameters": { /* Zod schema JSON */ },
+  "returns": { /* Zod schema JSON */ },
+  "handler": "export async function execute(input) { ... }",
+  "handlerType": "custom",
+  "permissions": ["network:request"]
+}
+
+Response 201:
+{
+  "id": "skill_999",
+  "skillId": "custom.validator",
+  "createdAt": "2024-12-27T10:00:00Z"
+}
+```
+
+#### 执行 Skill（测试）
+
+```http
+POST /api/skills/:id/execute
+Content-Type: application/json
+
+{
+  "input": {
+    "path": "/path/to/file.txt",
+    "encoding": "utf8"
+  }
+}
+
+Response 200:
+{
+  "success": true,
+  "data": {
+    "content": "Hello World",
+    "size": 11
+  },
+  "duration": 15,
+  "cost": { "tokens": 0, "credits": 1 }
+}
+```
+
+#### 获取 Agent 的 Skills
+
+```http
+GET /api/agents/:id/skills
+
+Response 200:
+{
+  "data": [
+    {
+      "id": "agent_skill_001",
+      "agentId": "agent_123",
+      "skill": {
+        "id": "skill_001",
+        "skillId": "file.read",
+        "name": "Read File"
+      },
+      "config": { /* Agent 特定配置 */ },
+      "priority": 10
+    }
+  ]
+}
+```
+
+#### 为 Agent 添加 Skill
+
+```http
+POST /api/agents/:id/skills
+Content-Type: application/json
+
+{
+  "skillId": "skill_001",
+  "config": { "maxSize": 10485760 },
+  "priority": 10
+}
+
+Response 201:
+{
+  "id": "agent_skill_001",
+  "createdAt": "2024-12-27T10:00:00Z"
+}
+```
+
+#### 获取 Skill 执行历史
+
+```http
+GET /api/skills/:id/executions?limit=20
+
+Response 200:
+{
+  "data": [
+    {
+      "id": "exec_001",
+      "skillId": "skill_001",
+      "agentId": "agent_123",
+      "executionId": "workflow_exec_456",
+      "input": { "path": "/file.txt" },
+      "output": { "content": "...", "size": 100 },
+      "status": "success",
+      "duration": 25,
+      "actualCost": { "tokens": 0, "credits": 1 },
+      "startedAt": "2024-12-27T10:00:00Z",
+      "completedAt": "2024-12-27T10:00:00.025Z"
+    }
+  ],
+  "statistics": {
+    "totalExecutions": 1234,
+    "successRate": 0.98,
+    "avgDuration": 23,
+    "totalCost": { "tokens": 0, "credits": 1234 }
+  }
+}
+```
+
+---
+
 ### Code Index API
 
 #### 索引代码库
@@ -387,13 +633,108 @@ interface Agent {
   role: string;                  // 角色类型
   model: string;                 // LLM 模型
   systemPrompt: string;          // 系统提示词
-  tools: string[];               // 可用工具列表
+  tools: string[];               // ⚠️ 已废弃，使用 skills 替代
   status: AgentStatus;           // 当前状态
   createdAt: Date;
   updatedAt: Date;
 }
 
 type AgentStatus = 'idle' | 'working' | 'completed' | 'failed' | 'paused';
+```
+
+### Skill
+
+```typescript
+interface Skill {
+  id: string;                    // UUID
+  skillId: string;               // 唯一标识（如 "file.read"）
+  name: string;                  // 显示名称
+  description: string;           // 功能描述
+  category: SkillCategory;       // 分类
+
+  // 定义（JSON Schema 格式）
+  parameters: JSONSchema;        // 输入参数 schema
+  returns: JSONSchema;           // 输出 schema
+
+  // 实现
+  handler: string;               // 执行代码或引用路径
+  handlerType: 'builtin' | 'custom' | 'remote';
+
+  // 权限和成本
+  permissions: string[];         // 如 ["filesystem:read", "network:request"]
+  estimatedCost: {
+    tokens?: number;
+    credits?: number;
+    apiCalls?: number;
+  };
+
+  // 元数据
+  version: string;               // 版本号
+  isActive: boolean;             // 是否启用
+  isPublic: boolean;             // 是否公开到 Marketplace
+  createdBy: string;             // 创建者 ID
+  usageCount: number;            // 使用次数统计
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+type SkillCategory =
+  | 'filesystem'
+  | 'code'
+  | 'git'
+  | 'api'
+  | 'database'
+  | 'shell'
+  | 'other';
+```
+
+### AgentSkill（关联表）
+
+```typescript
+interface AgentSkill {
+  id: string;                    // UUID
+  agentId: string;               // Agent ID
+  skillId: string;               // Skill ID
+
+  // Agent 特定配置（可覆盖 Skill 默认配置）
+  config?: Record<string, any>;
+
+  // 优先级（数字越大优先级越高）
+  priority: number;
+
+  createdAt: Date;
+}
+```
+
+### SkillExecution
+
+```typescript
+interface SkillExecution {
+  id: string;                    // UUID
+  skillId: string;               // Skill ID
+  agentId?: string;              // 执行的 Agent ID（可选）
+  executionId?: string;          // 关联的 Workflow Execution ID（可选）
+
+  // 执行数据
+  input: Record<string, any>;    // 输入参数
+  output?: Record<string, any>;  // 输出结果
+  error?: string;                // 错误信息
+
+  // 执行元数据
+  status: 'success' | 'error' | 'timeout';
+  duration: number;              // 执行时长（毫秒）
+
+  // 实际成本
+  actualCost?: {
+    tokens?: number;
+    credits?: number;
+    apiCalls?: number;
+  };
+
+  startedAt: Date;
+  completedAt?: Date;
+}
 ```
 
 ### Workflow
@@ -534,6 +875,13 @@ interface ExecutionStep {
 
 ## 📝 变更历史
 
+### v1.1 - 2025-01-05
+- ✅ **新增 Agent Skills 系统规格**
+  - 新增 Skills 核心功能说明
+  - 新增 Skills API 规格（8 个端点）
+  - 新增 Skill、AgentSkill、SkillExecution 数据模型
+  - Agent 模型标记 tools 字段为已废弃
+
 ### v1.0 - 2025-12-29
 - 初始版本
 - 定义核心功能规格
@@ -543,4 +891,4 @@ interface ExecutionStep {
 ---
 
 **维护者**: Agent Flow Team
-**最后更新**: 2025-12-29
+**最后更新**: 2025-01-05

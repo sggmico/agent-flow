@@ -18,6 +18,7 @@ Agent Flow 致力于将 AI 从"问答工具"升级为"可协作、可审计、�
 
 - **可视化编排**：拖拽式设计 AI Agent 工作流，无需编写复杂代码
 - **多 Agent 协作**：让多个专业 Agent 协同完成复杂任务
+- **Agent Skills 系统**：可复用、类型安全的能力单元，让 Agent 具备文件操作、代码分析、Git 等实际执行能力
 - **实时监控**：追踪每个 Agent 的执行状态和结果
 - **智能代码理解**：基于向量搜索的代码语义问答
 - **质量保证**：内置代码审查、安全扫描等专业工具
@@ -38,6 +39,49 @@ Agent Flow 致力于将 AI 从"问答工具"升级为"可协作、可审计、�
 - 支持 Claude Sonnet 4、GPT-4o、Gemini 2.0 Flash 等主流模型
 - 灵活的角色定义和能力配置
 - 可复用的 Agent 模板
+
+### Agent Skills 系统 🧩
+
+**将 AI 从"对话工具"升级为"执行工具"**
+
+- **可复用能力单元**：通过 Skills 为 Agent 赋予文件操作、代码分析、Git 管理等实际执行能力
+- **类型安全**：基于 Zod Schema 的参数验证和返回值校验，确保执行可靠性
+- **成本追踪**：自动统计 Token 消耗、API 调用次数和执行时长，优化资源使用
+- **灵活扩展**：支持内置 Skills、自定义 Skills 和远程 Skills，适应不同场景需求
+- **LLM 集成**：自动转换为 OpenAI Functions 和 Anthropic Tools 格式，无缝对接主流 LLM
+
+#### 内置 Skills（持续扩展中）
+
+| Skill ID | 功能 | 用途 |
+|----------|------|------|
+| `file.read` | 读取文件内容 | 获取代码、配置文件内容 |
+| `file.write` | 写入文件 | 生成代码、创建文档 |
+| `code.analyze` | 代码静态分析 | 检测代码质量问题 |
+| `git.commit` | 创建 Git 提交 | 自动化版本控制 |
+| `git.diff` | 查看代码变更 | 代码审查辅助 |
+
+**使用示例**：
+
+```typescript
+// Agent 配置示例
+const codeReviewAgent = {
+  name: "代码审查助手",
+  model: "claude-sonnet-4",
+  skills: [
+    "file.read",      // 读取待审查文件
+    "code.analyze",   // 静态分析
+    "git.diff"        // 查看变更
+  ]
+};
+
+// Skill 执行追踪
+const execution = await executeSkill("code.analyze", {
+  filePath: "src/app.ts",
+  rules: ["security", "performance"]
+});
+
+console.log(execution.cost);  // { tokens: 1250, duration: 350 }
+```
 
 ### 工作流编排
 
@@ -94,6 +138,7 @@ Agent Flow 致力于将 AI 从"问答工具"升级为"可协作、可审计、�
 - **框架**：Mastra（TypeScript 原生 agent 框架）
 - **LLM**：Claude、GPT-4、Gemini
 - **Embeddings**：OpenAI text-embedding-3-large
+- **Skills 系统**：Zod Schema 验证 + SkillRegistry 管理
 
 ### 工具链
 
@@ -159,9 +204,12 @@ agent-flow/
 │   └── web/                # Next.js Web 应用
 ├── packages/               # 共享代码
 │   ├── shared/            # 业务逻辑 (100% 共享)
+│   │   ├── api/          # API 客户端 (Skills API 等)
+│   │   └── ...
 │   ├── ui/                # React 组件 (90% 共享)
 │   ├── database/          # Drizzle schemas
-│   └── mastra/            # AI agent 配置
+│   │   └── schema/       # 包含 skills、agent_skills 等表
+│   └── mastra/            # AI agent 配置 + Skills Registry
 ├── docs/
 │   ├── spec.md            # 功能规格说明
 │   └── local/             # 私有规划文档
@@ -197,6 +245,71 @@ pnpm test:coverage          # 生成覆盖率报告
 pnpm test:e2e               # 运行 E2E 测试
 ```
 
+### 开发 Skills
+
+Agent Skills 采用插件化架构，开发者可以轻松扩展新能力：
+
+```typescript
+// packages/mastra/src/skills/file.read.ts
+import { z } from 'zod';
+import { defineSkill } from '../registry';
+
+export const fileReadSkill = defineSkill({
+  skillId: 'file.read',
+  name: '读取文件',
+  description: '读取指定路径的文件内容',
+  category: 'filesystem',
+
+  // Zod Schema 定义参数
+  parameters: z.object({
+    path: z.string().describe('文件路径'),
+    encoding: z.enum(['utf8', 'base64']).default('utf8'),
+  }),
+
+  // 返回值 Schema
+  returns: z.object({
+    content: z.string(),
+    size: z.number(),
+  }),
+
+  // 执行逻辑
+  handler: async ({ path, encoding }) => {
+    const fs = await import('fs/promises');
+    const content = await fs.readFile(path, encoding);
+    const stats = await fs.stat(path);
+
+    return {
+      content,
+      size: stats.size,
+    };
+  },
+
+  // 权限声明
+  permissions: ['filesystem.read'],
+
+  // 预估成本（可选）
+  estimatedCost: {
+    tokens: 100,
+    apiCalls: 0,
+  },
+});
+```
+
+**注册 Skill**：
+
+```typescript
+import { SkillRegistry } from '@agent-flow/mastra/registry';
+
+const registry = new SkillRegistry();
+registry.register(fileReadSkill);
+
+// 执行
+const result = await registry.execute('file.read', {
+  path: './package.json',
+  encoding: 'utf8',
+});
+```
+
 ### 技术约束
 
 为了保持架构简洁和性能最优，项目遵循以下约束：
@@ -206,6 +319,7 @@ pnpm test:e2e               # 运行 E2E 测试
 - 使用 **Biome**（不使用 ESLint + Prettier）
 - 使用 **pnpm workspace**（不使用 Turborepo）
 - 优先使用 **Server-Sent Events**（仅必要时使用 WebSocket）
+- Skills 必须使用 **Zod Schema** 进行参数验证
 
 ---
 
