@@ -3,7 +3,7 @@
 > 开发进度追踪文档
 > 更新频率: 每日更新
 > 版本: v1.1
-> 最后更新: 2025-01-05
+> 最后更新: 2026-01-05
 
 ---
 
@@ -11,7 +11,7 @@
 
 - **当前阶段**: Phase 1 - MVP 基础搭建
 - **整体完成度**: 43% (42/98 任务)
-- **本周目标**: 完成 Agent Skills 系统架构实施
+- **本周目标**: 完成 Agent Skills Phase 1 实施 + 修复 Web 构建报错
 - **已完成**: ✅ Day 1-3 项目初始化，✅ Day 4-7 数据库搭建，✅ Day 8-10 UI 基础组件，✅ Day 11-13 Agent 后端 + 测试
 
 ---
@@ -118,7 +118,7 @@
 - ✅ 完整的数据库 Schema (5 个核心表)
 - ✅ 100% 类型安全的 Drizzle ORM 配置
 - ✅ Redis 缓存服务 (CacheService 工具类)
-- ✅ 详细的数据库设置文档 (docs.local/001_database_setup_with_drizzle_and_pgvector.md)
+- ✅ 详细的数据库设置文档
 - ✅ 向量搜索能力 (pgvector + HNSW 索引)
 - ✅ 数据库迁移成功执行 (Supabase PostgreSQL)
 - ✅ 数据库连接测试脚本 (scripts/test-db.ts)
@@ -789,7 +789,7 @@ _暂无_
   - 环境变量和文档配置
   - **数据库迁移成功执行** (Supabase PostgreSQL)
   - **创建数据库连接测试脚本** (scripts/test-db.ts)
-  - **生成详细技术文档** (docs.local/001_database_setup_with_drizzle_and_pgvector.md)
+  - **生成详细技术文档**
   - 整体进度: 12% → 20%
 
 ---
@@ -802,7 +802,11 @@ _暂无_
 3. ✅ ~~搭建 UI 基础组件~~ (已完成 2024-12-29)
 4. ✅ ~~Agent 后端 API + 测试~~ (已完成 2025-01-04)
 5. ✅ ~~Agent Skills 系统架构规划~~ (已完成 2025-01-05)
-6. **Agent Skills 系统 Phase 1 实施** (Day 14-16) ← 当前任务
+6. **修复 Web 构建报错（ioredis/dns）** (Day 14) ← 当前任务
+   - 仅在 Node.js Runtime 使用 ioredis
+   - 拆分 server-only 代码与客户端渲染代码
+   - 验证 Next.js 构建通过
+7. **Agent Skills 系统 Phase 1 实施** (Day 15-17)
    - Skills 数据库 schema（3 个表）
    - SkillRegistry 核心类
    - 5 个内置 Skills（file.read, file.write, code.analyze, git.commit, git.diff）
@@ -823,16 +827,17 @@ _暂无_
 - ⏳ Mastra 框架集成
 
 **优先级任务**:
-1. **P0**: Skills 数据库 schema 定义和迁移（预计 0.5 天）
-2. **P0**: SkillRegistry 核心类实现（预计 1 天）
-3. **P0**: 5 个内置 Skills 开发（预计 1 天）
-4. **P0**: Skills 系统单元测试（预计 0.5 天）
-5. **P0**: Agent-Skill 绑定机制（预计 1 天）
-6. **P1**: Agent 前端界面开发（预计 2-3 天）
-7. **P1**: Mastra 集成和测试（预计 1-2 天）
+1. **P0**: 修复 Web 构建报错（ioredis/dns）（预计 0.5 天）
+2. **P0**: Skills 数据库 schema 定义和迁移（预计 0.5 天）
+3. **P0**: SkillRegistry 核心类实现（预计 1 天）
+4. **P0**: 5 个内置 Skills 开发（预计 1 天）
+5. **P0**: Skills 系统单元测试（预计 0.5 天）
+6. **P0**: Agent-Skill 绑定机制（预计 1 天）
+7. **P1**: Agent 前端界面开发（预计 2-3 天）
+8. **P1**: Mastra 集成和测试（预计 1-2 天）
 
 ---
 
 **维护者**: Agent Flow Team
 **更新频率**: 每日更新任务状态
-**最后更新**: 2025-01-05
+**最后更新**: 2026-01-05

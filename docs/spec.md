@@ -866,9 +866,7 @@ interface ExecutionStep {
 
 ## 🔗 相关文档
 
-- **项目规划**: `docs/local/kick-off.md` (私有)
-- **技术选型**: `docs/local/tech-cherry-pick.md` (私有)
-- **多端架构**: `docs/local/multi-platform.md` (私有)
+- **项目规划**: `docs/kick-off.md`
 - **开发任务**: `docs/task.md`
 
 ---

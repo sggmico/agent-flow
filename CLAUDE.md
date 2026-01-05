@@ -65,11 +65,9 @@ agent-flow/
 │   └── mastra/            # AI agent 配置 (100% 共享)
 └── docs/
     ├── spec.md            # 功能规格说明
+    ├── kick-off.md        # 项目规划文档
     ├── task.md            # 开发任务清单
-    └── local/             # 私有规划文档 (不跟踪)
 ```
-
-**注意**：匹配 `*local*` 的文件/目录已被 gitignore，包含私有规划文档。
 
 ---
 
@@ -361,9 +359,8 @@ export async function GET(
 ## 关键参考文档
 
 - **功能规格**：`docs/spec.md` - 完整的 API 规格、数据模型和功能需求
-- **任务追踪**：`docs/local/task.md` (私有) - 开发任务检查清单和进度
-- **技术栈分析**：`docs/local/tech-cherry-pick.md` (私有) - 详细的技术选型理由
-- **架构规划**：`docs/local/kick-off.md` (私有) - 综合项目计划
+- **任务追踪**：`docs/task.md` - 开发任务检查清单和进度
+- **架构规划**：`docs/kick-off.md` - 综合项目计划
 
 ---
 
@@ -403,7 +400,7 @@ GITHUB_TOKEN=              # GitHub Personal Access Token (可选，提高 API �
 
 ## 环境变量管理规范
 
-**分层配置原则**：遵循 `docs/extend_local/005. Monorepo 环境变量分层规范.md`
+**分层配置原则**：遵循内部环境变量分层规范
 
 ### 核心规则
 

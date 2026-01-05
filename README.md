@@ -212,7 +212,6 @@ agent-flow/
 │   └── mastra/            # AI agent 配置 + Skills Registry
 ├── docs/
 │   ├── spec.md            # 功能规格说明
-│   └── local/             # 私有规划文档
 ├── CLAUDE.md              # AI 开发指南
 └── README.md              # 本文件
 ```
