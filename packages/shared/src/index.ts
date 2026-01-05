@@ -8,3 +8,6 @@ export { redis, cache, testRedisConnection, closeRedisConnection, CacheService }
 
 // 导出 Schemas
 export * from './schemas';
+
+// 导出 API 客户端
+export * from './api';
