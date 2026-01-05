@@ -28,8 +28,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { createAgent } from '@/lib/api/agents';
-import { type CreateAgentInput, createAgentSchema } from '@agent-flow/shared/schemas';
+import { type CreateAgentInput, createAgent, createAgentSchema } from '@agent-flow/shared';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';

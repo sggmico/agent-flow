@@ -1,5 +1,5 @@
 import type { Agent } from '@agent-flow/database/schema';
-import type { AgentListQuery, CreateAgentInput, UpdateAgentInput } from '@agent-flow/shared/schemas';
+import type { AgentListQuery, CreateAgentInput, UpdateAgentInput } from '../schemas';
 
 /**
  * API 响应格式
@@ -28,7 +28,10 @@ async function handleApiError(response: Response): Promise<never> {
   let errorMessage = `请求失败 (${response.status})`;
 
   try {
-    const errorData = await response.json();
+    const errorData = (await response.json()) as {
+      error?: { message?: string };
+      message?: string;
+    };
     if (errorData.error?.message) {
       errorMessage = errorData.error.message;
     } else if (errorData.message) {
@@ -66,7 +69,7 @@ export async function getAgents(params: Partial<AgentListQuery> = {}): Promise<A
     await handleApiError(response);
   }
 
-  return response.json();
+  return response.json() as Promise<AgentListResponse>;
 }
 
 /**
@@ -79,7 +82,7 @@ export async function getAgent(id: number): Promise<ApiResponse<Agent>> {
     await handleApiError(response);
   }
 
-  return response.json();
+  return response.json() as Promise<ApiResponse<Agent>>;
 }
 
 /**
@@ -98,7 +101,7 @@ export async function createAgent(data: CreateAgentInput): Promise<ApiResponse<A
     await handleApiError(response);
   }
 
-  return response.json();
+  return response.json() as Promise<ApiResponse<Agent>>;
 }
 
 /**
@@ -117,7 +120,7 @@ export async function updateAgent(id: number, data: UpdateAgentInput): Promise<A
     await handleApiError(response);
   }
 
-  return response.json();
+  return response.json() as Promise<ApiResponse<Agent>>;
 }
 
 /**
@@ -132,5 +135,5 @@ export async function deleteAgent(id: number): Promise<ApiResponse<null>> {
     await handleApiError(response);
   }
 
-  return response.json();
+  return response.json() as Promise<ApiResponse<null>>;
 }

@@ -27,9 +27,8 @@ import {
 } from '@/components/ui/select';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useToast } from '@/hooks/use-toast';
-import { deleteAgent, getAgents } from '@/lib/api/agents';
 import type { Agent } from '@agent-flow/database/schema';
-import type { AgentStatus } from '@agent-flow/shared/schemas';
+import { type AgentStatus, deleteAgent, getAgents } from '@agent-flow/shared';
 import { useQuery } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search } from 'lucide-react';
