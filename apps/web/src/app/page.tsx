@@ -29,8 +29,8 @@ export default function Home() {
               className="reveal max-w-xl text-lg text-[color:var(--ink-muted)] sm:text-xl"
               style={{ animationDelay: '200ms' }}
             >
-              Agent Flow 用可视化工作台把编排、执行、审计整合成一个连续的操作面板，让每个
-              Agent 都有清晰职责与可靠产出。
+              Agent Flow 用可视化工作台把编排、执行、审计整合成一个连续的操作面板，让每个 Agent
+              都有清晰职责与可靠产出。
             </p>
           </div>
 
@@ -65,7 +65,10 @@ export default function Home() {
             </a>
           </div>
 
-          <div className="reveal grid w-full gap-4 sm:grid-cols-3" style={{ animationDelay: '360ms' }}>
+          <div
+            className="reveal grid w-full gap-4 sm:grid-cols-3"
+            style={{ animationDelay: '360ms' }}
+          >
             {[
               ['可视化编排', '拖拽搭建、即刻回放'],
               ['多 Agent 协作', '角色分工与交接可追踪'],
