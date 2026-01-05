@@ -6,6 +6,10 @@ interface PageContainerProps {
   description?: string;
   actions?: React.ReactNode;
   className?: string;
+  headerClassName?: string;
+  headerInnerClassName?: string;
+  contentClassName?: string;
+  contentInnerClassName?: string;
   titleClassName?: string;
   descriptionClassName?: string;
 }
@@ -16,6 +20,10 @@ export function PageContainer({
   description,
   actions,
   className,
+  headerClassName,
+  headerInnerClassName,
+  contentClassName,
+  contentInnerClassName,
   titleClassName,
   descriptionClassName,
 }: PageContainerProps) {
@@ -23,8 +31,13 @@ export function PageContainer({
     <div className={cn('flex-1', className)}>
       {/* 页面标题区域 */}
       {(title || description || actions) && (
-        <div className="border-b bg-muted/30 dark:bg-gray-900/30 dark:border-gray-800">
-          <div className="container max-w-7xl mx-auto px-8 py-6">
+        <div
+          className={cn(
+            'border-b border-[color:var(--stroke)] bg-[rgb(var(--panel-rgb)/0.55)]',
+            headerClassName,
+          )}
+        >
+          <div className={cn('container max-w-7xl mx-auto px-8 py-6', headerInnerClassName)}>
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div className="space-y-1">
                 {title && (
@@ -45,7 +58,9 @@ export function PageContainer({
       )}
 
       {/* 页面内容 */}
-      <div className="container max-w-7xl mx-auto px-8 py-6">{children}</div>
+      <div className={cn('container max-w-7xl mx-auto px-8 py-6', contentClassName)}>
+        <div className={cn(contentInnerClassName)}>{children}</div>
+      </div>
     </div>
   );
 }

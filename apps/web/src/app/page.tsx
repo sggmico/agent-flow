@@ -1,150 +1,157 @@
 export default function Home() {
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
-      {/* 背景装饰 */}
-      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-20" />
-      <div className="absolute inset-0 bg-gradient-to-t from-transparent via-purple-500/10 to-transparent" />
+    <main className="relative min-h-screen overflow-hidden bg-[color:var(--surface)] text-[color:var(--ink)]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_circle_at_12%_-12%,rgb(var(--accent-1-rgb)/0.22),transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_circle_at_85%_10%,rgb(var(--accent-2-rgb)/0.2),transparent_60%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1000px_circle_at_50%_120%,rgb(var(--accent-3-rgb)/0.16),transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 [background-image:linear-gradient(rgba(var(--grid-rgb),0.14)_1px,transparent_1px),linear-gradient(90deg,rgba(var(--grid-rgb),0.12)_1px,transparent_1px)] [background-size:48px_48px] opacity-45" />
+      <div className="pointer-events-none absolute inset-0 [background-image:radial-gradient(rgba(var(--grid-rgb),0.2)_1px,transparent_1px)] [background-size:140px_140px] opacity-15" />
+      <div className="pointer-events-none absolute inset-0 grain opacity-10 dark:opacity-20" />
 
-      {/* 主内容 */}
-      <div className="relative z-10 flex max-w-5xl flex-col items-center gap-8 text-center">
-        {/* 标题区域 */}
-        <div className="flex flex-col gap-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/20 bg-purple-500/10 px-4 py-2 text-sm text-purple-300">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-purple-500" />
-            </span>
-            现已开放 Beta 测试
+      <div className="relative mx-auto grid max-w-6xl items-center gap-16 px-6 py-20 lg:grid-cols-[1.05fr_0.95fr] lg:px-10">
+        <div className="flex flex-col items-start gap-8">
+          <div className="reveal inline-flex items-center gap-3 rounded-full border border-[color:var(--stroke)] bg-[rgb(var(--panel-rgb)/0.75)] px-4 py-2 text-xs uppercase tracking-[0.24em] text-[color:var(--ink-muted)]">
+            <span className="inline-flex h-2 w-2 rounded-full bg-[color:var(--accent-1)]" />
+            Beta 已开放 · 2026
           </div>
 
-          <h1 className="bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text py-2 text-6xl font-bold leading-tight tracking-tight text-transparent sm:text-7xl md:text-8xl">
-            Agent Flow
-          </h1>
+          <div className="space-y-6">
+            <h1
+              className="reveal font-[family:var(--font-display)] text-5xl leading-[1.4] sm:text-6xl lg:text-7xl"
+              style={{ animationDelay: '120ms' }}
+            >
+              让 Agent 像团队一样协作，
+              <span className="mt-2 block bg-[linear-gradient(90deg,var(--accent-1),var(--accent-2))] bg-clip-text text-transparent">
+                而不是工具。
+              </span>
+            </h1>
+            <p
+              className="reveal max-w-xl text-lg text-[color:var(--ink-muted)] sm:text-xl"
+              style={{ animationDelay: '200ms' }}
+            >
+              Agent Flow 用可视化工作台把编排、执行、审计整合成一个连续的操作面板，让每个
+              Agent 都有清晰职责与可靠产出。
+            </p>
+          </div>
 
-          <p className="mx-auto max-w-2xl text-xl text-slate-300 sm:text-2xl">
-            让 AI Agent 协作触手可及
-          </p>
+          <div className="reveal flex flex-wrap gap-3" style={{ animationDelay: '280ms' }}>
+            <a
+              href="/dashboard"
+              className="inline-flex items-center gap-3 rounded-full bg-[linear-gradient(120deg,var(--accent-1),var(--accent-2))] px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-[0_18px_40px_rgba(45,124,255,0.35)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(45,124,255,0.45)]"
+            >
+              进入控制台
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[rgb(var(--panel-strong-rgb)/0.92)] text-[color:var(--ink)]">
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  />
+                </svg>
+              </span>
+            </a>
+            <a
+              href="/docs"
+              className="inline-flex items-center gap-2 rounded-full border border-[color:var(--stroke)] px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-[color:var(--ink-muted)] transition hover:border-[color:var(--stroke-strong)] hover:text-[color:var(--ink)]"
+            >
+              查看文档
+            </a>
+          </div>
 
-          <p className="mx-auto max-w-3xl text-base text-slate-400 sm:text-lg">
-            通过可视化界面轻松创建、编排和监控 AI Agent，将 AI
-            从"问答工具"升级为"可协作、可审计、可执行的工作系统"
-          </p>
+          <div className="reveal grid w-full gap-4 sm:grid-cols-3" style={{ animationDelay: '360ms' }}>
+            {[
+              ['可视化编排', '拖拽搭建、即刻回放'],
+              ['多 Agent 协作', '角色分工与交接可追踪'],
+              ['实时监控', '任务、日志、结果同屏'],
+            ].map(([title, desc]) => (
+              <div
+                key={title}
+                className="rounded-2xl border border-[color:var(--stroke)] bg-[rgb(var(--panel-rgb)/0.8)] p-4 shadow-[0_20px_60px_rgba(6,12,20,0.18)]"
+              >
+                <p className="text-xs uppercase tracking-[0.2em] text-[color:var(--ink-muted)]">
+                  Feature
+                </p>
+                <p className="mt-2 font-semibold text-[color:var(--ink)]">{title}</p>
+                <p className="mt-2 text-sm text-[color:var(--ink-muted)]">{desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* 按钮组 */}
-        <div className="flex flex-col gap-4 sm:flex-row">
-          <a
-            href="/dashboard"
-            className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-purple-500/50 transition-all hover:scale-105 hover:shadow-xl hover:shadow-purple-500/50"
-          >
-            <span>开始使用</span>
-            <svg
-              className="h-5 w-5 transition-transform group-hover:translate-x-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 7l5 5m0 0l-5 5m5-5H6"
-              />
-            </svg>
-          </a>
+        <div className="relative flex items-center justify-center">
+          <div className="float-slower absolute -left-6 top-8 hidden h-24 w-24 rounded-3xl border border-[color:var(--stroke)] bg-[rgb(var(--panel-rgb)/0.8)] shadow-[0_20px_40px_rgba(6,12,20,0.2)] lg:block" />
+          <div className="float-slow absolute -right-8 bottom-10 hidden h-20 w-20 rounded-full border border-[color:var(--stroke)] bg-[rgb(var(--accent-3-rgb)/0.65)] lg:block" />
 
-          <a
-            href="/docs"
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-600 bg-slate-800/50 px-8 py-4 text-lg font-semibold text-white backdrop-blur-sm transition-all hover:border-purple-500/50 hover:bg-slate-800"
-          >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-              />
-            </svg>
-            <span>查看文档</span>
-          </a>
-        </div>
-
-        {/* 特性卡片 */}
-        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="group rounded-xl border border-slate-700 bg-slate-800/50 p-6 backdrop-blur-sm transition-all hover:border-purple-500/50 hover:bg-slate-800">
-            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-purple-500/10">
-              <svg
-                className="h-6 w-6 text-purple-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"
-                />
-              </svg>
+          <div className="relative w-full max-w-md rounded-[32px] border border-[color:var(--stroke)] bg-[rgb(var(--panel-rgb)/0.9)] p-6 shadow-[0_30px_80px_rgba(6,12,20,0.25)] backdrop-blur">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--ink-muted)]">
+                  Flow Canvas
+                </p>
+                <p className="mt-2 text-lg font-semibold text-[color:var(--ink)]">协作轨迹</p>
+              </div>
+              <span className="inline-flex items-center rounded-full bg-[rgb(var(--accent-2-rgb)/0.15)] px-3 py-1 text-xs font-semibold text-[color:var(--accent-2)]">
+                Live
+              </span>
             </div>
-            <h3 className="mb-2 text-lg font-semibold text-white">可视化编排</h3>
-            <p className="text-sm text-slate-400">拖拽式设计 Agent 工作流，无需编写复杂代码</p>
-          </div>
 
-          <div className="group rounded-xl border border-slate-700 bg-slate-800/50 p-6 backdrop-blur-sm transition-all hover:border-purple-500/50 hover:bg-slate-800">
-            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-purple-500/10">
-              <svg
-                className="h-6 w-6 text-purple-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
+            <div className="mt-6 space-y-4">
+              {[
+                ['检索 Agent', '收集市场输入', 'queued'],
+                ['策略 Agent', '生成决策草案', 'running'],
+                ['执行 Agent', '发布自动化任务', 'ready'],
+              ].map(([title, desc, status]) => (
+                <div
+                  key={title}
+                  className="flex items-center justify-between rounded-2xl border border-[color:var(--stroke)] bg-[rgb(var(--panel-rgb)/0.82)] px-4 py-3"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-[color:var(--ink)]">{title}</p>
+                    <p className="text-xs text-[color:var(--ink-muted)]">{desc}</p>
+                  </div>
+                  <span className="text-xs uppercase tracking-[0.2em] text-[color:var(--ink-muted)]">
+                    {status}
+                  </span>
+                </div>
+              ))}
             </div>
-            <h3 className="mb-2 text-lg font-semibold text-white">多 Agent 协作</h3>
-            <p className="text-sm text-slate-400">让多个专业 Agent 协同完成复杂任务</p>
-          </div>
 
-          <div className="group rounded-xl border border-slate-700 bg-slate-800/50 p-6 backdrop-blur-sm transition-all hover:border-purple-500/50 hover:bg-slate-800">
-            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-purple-500/10">
-              <svg
-                className="h-6 w-6 text-purple-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                />
-              </svg>
+            <div className="mt-6 rounded-2xl border border-[color:var(--stroke)] bg-[linear-gradient(135deg,rgba(var(--accent-1-rgb),0.18),rgba(var(--accent-2-rgb),0.1))] p-4 text-[color:var(--ink)]">
+              <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[color:var(--ink-muted)]">
+                <span>Runtime</span>
+                <span>98.7% 成功率</span>
+              </div>
+              <div className="mt-3 flex items-end justify-between">
+                <div>
+                  <p className="text-3xl font-semibold">00:42</p>
+                  <p className="text-xs text-[color:var(--ink-muted)]">平均响应时间</p>
+                </div>
+                <div className="flex gap-2">
+                  {[68, 40, 55, 30, 76].map((value, index) => (
+                    <span
+                      key={`${value}-${index}`}
+                      className="inline-flex w-3 rounded-full bg-[linear-gradient(180deg,var(--accent-1),var(--accent-2))]"
+                      style={{ height: `${value}px` }}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
-            <h3 className="mb-2 text-lg font-semibold text-white">实时监控</h3>
-            <p className="text-sm text-slate-400">追踪每个 Agent 的执行状态和结果</p>
+
+            <div className="mt-6 flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[color:var(--ink-muted)]">
+              <span>审计记录 · 自动生成</span>
+              <span>23 项</span>
+            </div>
           </div>
         </div>
       </div>
-
-      {/* 底部渐变 */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent" />
     </main>
   );
 }
