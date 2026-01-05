@@ -12,6 +12,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@agent-flow/database": "workspace:*",
     "ioredis": "^5.4.2",
     "zod": "^4.2.1"
   },

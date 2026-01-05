@@ -160,6 +160,9 @@ importers:
 
   packages/shared:
     dependencies:
+      '@agent-flow/database':
+        specifier: workspace:*
+        version: link:../database
       ioredis:
         specifier: ^5.4.2
         version: 5.8.2
