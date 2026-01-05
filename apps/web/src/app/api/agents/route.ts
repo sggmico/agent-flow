@@ -11,15 +11,21 @@ import { type NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+    const getOptionalParam = (key: string) => {
+      const value = searchParams.get(key);
+      if (value === null) return undefined;
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : undefined;
+    };
 
     // 验证查询参数
     const params = agentListQuerySchema.parse({
-      page: searchParams.get('page'),
-      limit: searchParams.get('limit'),
-      status: searchParams.get('status'),
-      search: searchParams.get('search'),
-      sortBy: searchParams.get('sortBy'),
-      sortOrder: searchParams.get('sortOrder'),
+      page: getOptionalParam('page'),
+      limit: getOptionalParam('limit'),
+      status: getOptionalParam('status'),
+      search: getOptionalParam('search'),
+      sortBy: getOptionalParam('sortBy'),
+      sortOrder: getOptionalParam('sortOrder'),
     });
 
     const { page, limit, status, search, sortBy, sortOrder } = params;
