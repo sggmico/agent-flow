@@ -8,8 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import type { Agent } from '@agent-flow/database/schema';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { deleteAgent, getAgent } from '@agent-flow/shared';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Brain, Clock, Edit, Hash, Thermometer, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -32,12 +32,18 @@ export default function AgentDetailPage({ params }: AgentDetailPageProps) {
   const { data, isLoading, error } = useQuery({
     queryKey: ['agent', agentId],
     queryFn: () => getAgent(agentId),
+    enabled: Number.isFinite(agentId), // 只有当 agentId 有效时才发起请求
   });
 
   // 删除 mutation
   const deleteMutation = useMutation({
     mutationFn: deleteAgent,
     onSuccess: () => {
+      // 失效列表页缓存
+      queryClient.invalidateQueries({ queryKey: ['agents'] });
+      // 移除当前 agent 的详情缓存
+      queryClient.removeQueries({ queryKey: ['agent', agentId] });
+
       toast({
         title: '删除成功',
         description: 'Agent 已成功删除',
@@ -67,6 +73,23 @@ export default function AgentDetailPage({ params }: AgentDetailPageProps) {
     router.push('/agents');
   };
 
+  // 处理无效的 agentId
+  if (!Number.isFinite(agentId)) {
+    return (
+      <MainLayout>
+        <PageContainer>
+          <div className="flex flex-col items-center justify-center h-64 gap-4">
+            <p className="text-red-500">无效的 Agent ID</p>
+            <Button variant="outline" onClick={handleBack}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              返回列表
+            </Button>
+          </div>
+        </PageContainer>
+      </MainLayout>
+    );
+  }
+
   if (isLoading) {
     return (
       <MainLayout>
@@ -83,8 +106,12 @@ export default function AgentDetailPage({ params }: AgentDetailPageProps) {
     return (
       <MainLayout>
         <PageContainer>
-          <div className="flex items-center justify-center h-64">
-            <p className="text-red-500">加载失败</p>
+          <div className="flex flex-col items-center justify-center h-64 gap-4">
+            <p className="text-red-500">加载失败: {error?.message || '未知错误'}</p>
+            <Button variant="outline" onClick={handleBack}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              返回列表
+            </Button>
           </div>
         </PageContainer>
       </MainLayout>

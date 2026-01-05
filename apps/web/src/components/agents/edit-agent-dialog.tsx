@@ -85,7 +85,13 @@ export function EditAgentDialog({ agent, open, onOpenChange }: EditAgentDialogPr
       return updateAgent(agent.id, data);
     },
     onSuccess: () => {
+      // 失效列表页缓存
       queryClient.invalidateQueries({ queryKey: ['agents'] });
+      // 失效详情页缓存
+      if (agent) {
+        queryClient.invalidateQueries({ queryKey: ['agent', agent.id] });
+      }
+
       toast({
         title: '更新成功',
         description: 'Agent 已成功更新',
