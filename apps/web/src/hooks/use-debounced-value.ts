@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
  * @param delay 延迟时间（毫秒）
  * @returns 防抖后的值
  */
-export function useDebouncedValue<T>(value: T, delay: number = 300): T {
+export function useDebouncedValue<T>(value: T, delay = 300): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
   useEffect(() => {
