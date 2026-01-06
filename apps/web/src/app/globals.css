@@ -25,6 +25,10 @@ body[data-scroll-locked] {
 
 @layer base {
   :root {
+    --font-sans: "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", "Noto Sans", Arial,
+      sans-serif;
+    --font-display: "Avenir Next", "Avenir", "Trebuchet MS", "Segoe UI", "Helvetica Neue",
+      sans-serif;
     --background: 224 100% 98%;
     --foreground: 220 35% 10%;
     --card: 222 70% 99%;

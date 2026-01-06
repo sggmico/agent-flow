@@ -11,22 +11,17 @@ import type { Agent } from '@agent-flow/database/schema';
 import { deleteAgent, getAgent } from '@agent-flow/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Brain, Clock, Edit, Hash, Thermometer, Trash2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-interface AgentDetailPageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default function AgentDetailPage({ params }: AgentDetailPageProps) {
+export default function AgentDetailPage() {
+  const params = useParams<{ id: string }>();
   const router = useRouter();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  const agentId = Number.parseInt(params.id, 10);
+  const agentId = Number.parseInt(params?.id ?? '', 10);
 
   // 获取 Agent 数据
   const { data, isLoading, error } = useQuery({

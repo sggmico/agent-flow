@@ -1,7 +1,6 @@
-import { db } from '@agent-flow/database';
+import { db, eq } from '@agent-flow/database';
 import { agents } from '@agent-flow/database/schema';
 import { type UpdateAgentInput, updateAgentSchema } from '@agent-flow/shared';
-import { eq } from 'drizzle-orm';
 import { type NextRequest, NextResponse } from 'next/server';
 
 /**

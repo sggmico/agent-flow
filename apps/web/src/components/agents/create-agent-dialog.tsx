@@ -33,6 +33,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 interface CreateAgentDialogProps {
   open: boolean;
@@ -43,14 +44,19 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  type CreateAgentFormInput = z.input<typeof createAgentSchema>;
 
-  const form = useForm<CreateAgentInput>({
+  const form = useForm<CreateAgentFormInput>({
     resolver: zodResolver(createAgentSchema),
     defaultValues: {
       name: '',
       role: '',
       description: '',
+      model: 'claude-sonnet-4',
       systemPrompt: '',
+      temperature: 70,
+      maxTokens: 4000,
+      tools: [],
       createdBy: 1, // TODO: 从用户认证获取
     },
   });
@@ -82,10 +88,11 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
     },
   });
 
-  const onSubmit = async (data: CreateAgentInput) => {
+  const onSubmit = async (data: CreateAgentFormInput) => {
     setIsSubmitting(true);
     try {
-      await mutation.mutateAsync(data);
+      const validated = createAgentSchema.parse(data) as CreateAgentInput;
+      await mutation.mutateAsync(validated);
     } finally {
       setIsSubmitting(false);
     }

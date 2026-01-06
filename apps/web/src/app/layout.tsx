@@ -1,19 +1,8 @@
 import type { Metadata } from 'next';
-import { Exo_2, Oxanium } from 'next/font/google';
 import './globals.css';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
-
-const displayFont = Oxanium({
-  subsets: ['latin'],
-  variable: '--font-display',
-});
-
-const bodyFont = Exo_2({
-  subsets: ['latin'],
-  variable: '--font-sans',
-});
 
 export const metadata: Metadata = {
   title: 'Agent Flow',
@@ -27,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN" suppressHydrationWarning>
-      <body className={`${displayFont.variable} ${bodyFont.variable} antialiased`}>
+      <body className="antialiased">
         <QueryProvider>
           <ThemeProvider
             attribute="class"
