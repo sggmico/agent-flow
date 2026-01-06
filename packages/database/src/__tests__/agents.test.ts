@@ -5,7 +5,15 @@ import { agentExecutions, agents, users } from '../schema';
 
 describe('Agent 数据库操作', () => {
   let testUserId: number;
-  let testAgentId: number;
+  let testAgentId: number | undefined;
+
+  const requireDefined = <T,>(value: T | undefined, label: string): T => {
+    expect(value, `${label} should be defined`).toBeDefined();
+    if (value === undefined) {
+      throw new Error(`${label} is undefined`);
+    }
+    return value;
+  };
 
   beforeAll(async () => {
     // 清理可能已存在的测试用户
@@ -15,7 +23,8 @@ describe('Agent 数据库操作', () => {
       .where(eq(users.email, 'test-agent-db@example.com'));
 
     if (existingUser.length > 0) {
-      const userId = existingUser[0].id;
+      const user = requireDefined(existingUser[0], 'existing user');
+      const userId = user.id;
       // 清理该用户的 agents 和 executions
       const userAgents = await db.select().from(agents).where(eq(agents.createdBy, userId));
       for (const agent of userAgents) {
@@ -30,16 +39,18 @@ describe('Agent 数据库操作', () => {
       .insert(users)
       .values({
         email: 'test-agent-db@example.com',
-        password: 'hashed_password',
+        passwordHash: 'hashed_password',
         name: 'Test User',
       })
       .returning();
-    testUserId = user.id;
+    testUserId = requireDefined(user, 'created user').id;
   });
 
   afterAll(async () => {
     // 清理测试数据
-    await db.delete(agentExecutions).where(eq(agentExecutions.agentId, testAgentId));
+    if (typeof testAgentId === 'number') {
+      await db.delete(agentExecutions).where(eq(agentExecutions.agentId, testAgentId));
+    }
     await db.delete(agents).where(eq(agents.createdBy, testUserId));
     await db.delete(users).where(eq(users.id, testUserId));
   });
@@ -70,16 +81,16 @@ describe('Agent 数据库操作', () => {
         })
         .returning();
 
-      expect(agent).toBeDefined();
-      expect(agent.id).toBeTypeOf('number');
-      expect(agent.name).toBe('Code Reviewer');
-      expect(agent.role).toBe('code_reviewer');
-      expect(agent.model).toBe('claude-sonnet-4');
-      expect(agent.status).toBe('idle'); // 默认状态
-      expect(agent.createdAt).toBeInstanceOf(Date);
-      expect(agent.updatedAt).toBeInstanceOf(Date);
+      const createdAgent = requireDefined(agent, 'created agent');
+      expect(createdAgent.id).toBeTypeOf('number');
+      expect(createdAgent.name).toBe('Code Reviewer');
+      expect(createdAgent.role).toBe('code_reviewer');
+      expect(createdAgent.model).toBe('claude-sonnet-4');
+      expect(createdAgent.status).toBe('idle'); // 默认状态
+      expect(createdAgent.createdAt).toBeInstanceOf(Date);
+      expect(createdAgent.updatedAt).toBeInstanceOf(Date);
 
-      testAgentId = agent.id;
+      testAgentId = createdAgent.id;
     });
 
     it('应该使用默认值创建 Agent', async () => {
@@ -93,10 +104,11 @@ describe('Agent 数据库操作', () => {
         })
         .returning();
 
-      expect(agent.status).toBe('idle');
-      expect(agent.temperature).toBe(70);
-      expect(agent.maxTokens).toBe(4000);
-      expect(agent.tools).toEqual([]);
+      const createdAgent = requireDefined(agent, 'created agent');
+      expect(createdAgent.status).toBe('idle');
+      expect(createdAgent.temperature).toBe(70);
+      expect(createdAgent.maxTokens).toBe(4000);
+      expect(createdAgent.tools).toEqual([]);
     });
   });
 
@@ -147,11 +159,12 @@ describe('Agent 数据库操作', () => {
         })
         .returning();
 
-      const [found] = await db.select().from(agents).where(eq(agents.id, created.id));
+      const createdAgent = requireDefined(created, 'created agent');
+      const [found] = await db.select().from(agents).where(eq(agents.id, createdAgent.id));
+      const foundAgent = requireDefined(found, 'found agent');
 
-      expect(found).toBeDefined();
-      expect(found.id).toBe(created.id);
-      expect(found.name).toBe('Specific Agent');
+      expect(foundAgent.id).toBe(createdAgent.id);
+      expect(foundAgent.name).toBe('Specific Agent');
     });
 
     it('应该根据状态筛选 Agents', async () => {
@@ -167,7 +180,8 @@ describe('Agent 数据库操作', () => {
 
       expect(page1).toHaveLength(2);
       expect(page2.length).toBeGreaterThanOrEqual(1);
-      expect(page1[0].id).not.toBe(page2[0]?.id);
+      const firstPageAgent = requireDefined(page1[0], 'page1 agent');
+      expect(firstPageAgent.id).not.toBe(page2[0]?.id);
     });
   });
 
@@ -184,6 +198,7 @@ describe('Agent 数据库操作', () => {
         })
         .returning();
 
+      const createdAgent = requireDefined(created, 'created agent');
       const [updated] = await db
         .update(agents)
         .set({
@@ -191,13 +206,14 @@ describe('Agent 数据库操作', () => {
           status: 'working',
           updatedAt: new Date(),
         })
-        .where(eq(agents.id, created.id))
+        .where(eq(agents.id, createdAgent.id))
         .returning();
 
-      expect(updated.name).toBe('Updated Name');
-      expect(updated.status).toBe('working');
-      expect(updated.role).toBe('original_role'); // 未改变的字段
-      expect(updated.updatedAt.getTime()).toBeGreaterThan(created.updatedAt.getTime());
+      const updatedAgent = requireDefined(updated, 'updated agent');
+      expect(updatedAgent.name).toBe('Updated Name');
+      expect(updatedAgent.status).toBe('working');
+      expect(updatedAgent.role).toBe('original_role'); // 未改变的字段
+      expect(updatedAgent.updatedAt.getTime()).toBeGreaterThan(createdAgent.updatedAt.getTime());
     });
 
     it('应该允许部分字段更新', async () => {
@@ -212,15 +228,17 @@ describe('Agent 数据库操作', () => {
         })
         .returning();
 
+      const createdAgent = requireDefined(created, 'created agent');
       const [updated] = await db
         .update(agents)
         .set({ temperature: 90 })
-        .where(eq(agents.id, created.id))
+        .where(eq(agents.id, createdAgent.id))
         .returning();
 
-      expect(updated.temperature).toBe(90);
-      expect(updated.name).toBe('Test Agent'); // 其他字段不变
-      expect(updated.role).toBe('tester');
+      const updatedAgent = requireDefined(updated, 'updated agent');
+      expect(updatedAgent.temperature).toBe(90);
+      expect(updatedAgent.name).toBe('Test Agent'); // 其他字段不变
+      expect(updatedAgent.role).toBe('tester');
     });
   });
 
@@ -236,9 +254,10 @@ describe('Agent 数据库操作', () => {
         })
         .returning();
 
-      await db.delete(agents).where(eq(agents.id, created.id));
+      const createdAgent = requireDefined(created, 'created agent');
+      await db.delete(agents).where(eq(agents.id, createdAgent.id));
 
-      const found = await db.select().from(agents).where(eq(agents.id, created.id));
+      const found = await db.select().from(agents).where(eq(agents.id, createdAgent.id));
 
       expect(found).toHaveLength(0);
     });
@@ -256,20 +275,21 @@ describe('Agent 数据库操作', () => {
         })
         .returning();
 
+      const createdAgent = requireDefined(agent, 'created agent');
       const [execution] = await db
         .insert(agentExecutions)
         .values({
-          agentId: agent.id,
+          agentId: createdAgent.id,
           status: 'running',
           input: { task: 'review code' },
           model: 'claude-sonnet-4',
         })
         .returning();
 
-      expect(execution).toBeDefined();
-      expect(execution.agentId).toBe(agent.id);
-      expect(execution.status).toBe('running');
-      expect(execution.input).toEqual({ task: 'review code' });
+      const createdExecution = requireDefined(execution, 'created execution');
+      expect(createdExecution.agentId).toBe(createdAgent.id);
+      expect(createdExecution.status).toBe('running');
+      expect(createdExecution.input).toEqual({ task: 'review code' });
     });
 
     it('应该更新 Execution 结果', async () => {
@@ -283,16 +303,18 @@ describe('Agent 数据库操作', () => {
         })
         .returning();
 
+      const createdAgent = requireDefined(agent, 'created agent');
       const [execution] = await db
         .insert(agentExecutions)
         .values({
-          agentId: agent.id,
+          agentId: createdAgent.id,
           status: 'pending',
           input: { task: 'analyze' },
           model: 'gpt-4o',
         })
         .returning();
 
+      const createdExecution = requireDefined(execution, 'created execution');
       const [completed] = await db
         .update(agentExecutions)
         .set({
@@ -302,14 +324,15 @@ describe('Agent 数据库操作', () => {
           executionTime: 2500, // ms
           completedAt: new Date(),
         })
-        .where(eq(agentExecutions.id, execution.id))
+        .where(eq(agentExecutions.id, createdExecution.id))
         .returning();
 
-      expect(completed.status).toBe('completed');
-      expect(completed.output).toEqual({ result: 'success' });
-      expect(completed.tokensUsed).toBe(1500);
-      expect(completed.executionTime).toBe(2500);
-      expect(completed.completedAt).toBeInstanceOf(Date);
+      const completedExecution = requireDefined(completed, 'completed execution');
+      expect(completedExecution.status).toBe('completed');
+      expect(completedExecution.output).toEqual({ result: 'success' });
+      expect(completedExecution.tokensUsed).toBe(1500);
+      expect(completedExecution.executionTime).toBe(2500);
+      expect(completedExecution.completedAt).toBeInstanceOf(Date);
     });
 
     it('应该记录执行失败', async () => {
@@ -323,16 +346,18 @@ describe('Agent 数据库操作', () => {
         })
         .returning();
 
+      const createdAgent = requireDefined(agent, 'created agent');
       const [execution] = await db
         .insert(agentExecutions)
         .values({
-          agentId: agent.id,
+          agentId: createdAgent.id,
           status: 'running',
           input: { task: 'fail' },
           model: 'claude-sonnet-4',
         })
         .returning();
 
+      const createdExecution = requireDefined(execution, 'created execution');
       const [failed] = await db
         .update(agentExecutions)
         .set({
@@ -340,11 +365,12 @@ describe('Agent 数据库操作', () => {
           error: 'API timeout',
           completedAt: new Date(),
         })
-        .where(eq(agentExecutions.id, execution.id))
+        .where(eq(agentExecutions.id, createdExecution.id))
         .returning();
 
-      expect(failed.status).toBe('failed');
-      expect(failed.error).toBe('API timeout');
+      const failedExecution = requireDefined(failed, 'failed execution');
+      expect(failedExecution.status).toBe('failed');
+      expect(failedExecution.error).toBe('API timeout');
     });
 
     it('应该查询 Agent 的所有执行记录', async () => {
@@ -359,16 +385,17 @@ describe('Agent 数据库操作', () => {
         .returning();
 
       // 创建多条执行记录
+      const createdAgent = requireDefined(agent, 'created agent');
       await db.insert(agentExecutions).values([
-        { agentId: agent.id, status: 'completed', model: 'gemini-2.0-flash', input: {} },
-        { agentId: agent.id, status: 'completed', model: 'gemini-2.0-flash', input: {} },
-        { agentId: agent.id, status: 'failed', model: 'gemini-2.0-flash', input: {} },
+        { agentId: createdAgent.id, status: 'completed', model: 'gemini-2.0-flash', input: {} },
+        { agentId: createdAgent.id, status: 'completed', model: 'gemini-2.0-flash', input: {} },
+        { agentId: createdAgent.id, status: 'failed', model: 'gemini-2.0-flash', input: {} },
       ]);
 
       const executions = await db
         .select()
         .from(agentExecutions)
-        .where(eq(agentExecutions.agentId, agent.id));
+        .where(eq(agentExecutions.agentId, createdAgent.id));
 
       expect(executions).toHaveLength(3);
       expect(executions.filter((e) => e.status === 'completed')).toHaveLength(2);
@@ -379,12 +406,9 @@ describe('Agent 数据库操作', () => {
   describe('数据完整性约束', () => {
     it('应该要求必填字段', async () => {
       await expect(async () => {
-        await db.insert(agents).values({
-          // @ts-expect-error - 测试缺少必填字段
-          role: 'tester',
-          model: 'claude-sonnet-4',
-          createdBy: testUserId,
-        });
+        await db
+          .insert(agents)
+          .values({ role: 'tester', model: 'claude-sonnet-4', createdBy: testUserId } as any);
       }).rejects.toThrow();
     });
 

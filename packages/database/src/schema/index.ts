@@ -11,5 +11,8 @@ export * from './agents';
 // Workflows
 export * from './workflows';
 
+// Skills
+export * from './skills';
+
 // Code Embeddings
 export * from './code-embeddings';
