@@ -2,17 +2,17 @@
 
 > 开发进度追踪文档
 > 更新频率: 每日更新
-> 版本: v1.1
-> 最后更新: 2026-01-05
+> 版本: v1.2
+> 最后更新: 2026-01-07
 
 ---
 
 ## 📊 整体进度
 
-- **当前阶段**: Phase 1 - MVP 基础搭建
-- **整体完成度**: 43% (42/98 任务)
-- **本周目标**: 完成 Agent Skills Phase 1 实施 + 修复 Web 构建报错
-- **已完成**: ✅ Day 1-3 项目初始化，✅ Day 4-7 数据库搭建，✅ Day 8-10 UI 基础组件，✅ Day 11-13 Agent 后端 + 测试
+- **当前阶段**: Phase 1 - MVP 核心功能
+- **整体完成度**: 37% (129/349 任务，含子任务)
+- **本周目标**: 推进 Skills Phase 2（Agent 绑定 + LLM Function Calling）
+- **已完成**: ✅ Day 1-3 项目初始化，✅ Day 4-7 数据库搭建，✅ Day 8-10 UI 基础组件，✅ Day 11-13 Agent 后端 + 测试，✅ Agent 前端界面，✅ Skills Phase 1
 
 ---
 
@@ -195,12 +195,12 @@
   - [x] 数据库操作集成测试（16 个测试）
   - [x] 测试覆盖率：schemas 100%，数据库 80%+
 
-- [ ] Agent 前端界面
-  - [ ] Agent 列表页面
-  - [ ] Agent 创建表单
-  - [ ] Agent 编辑表单
-  - [ ] Agent 详情展示
-  - [ ] Agent Card 组件
+- [x] Agent 前端界面 ✅
+  - [x] Agent 列表页面
+  - [x] Agent 创建表单
+  - [x] Agent 编辑表单
+  - [x] Agent 详情展示
+  - [x] Agent Card 组件
 
 - [ ] Mastra 集成
   - [ ] 安装 Mastra
@@ -213,7 +213,7 @@
 **预计时间**: 5-7 天
 **实际用时**: 3 天（后端完成）
 **优先级**: P0
-**完成日期**: 2025-01-04（后端 + 测试）
+**完成日期**: 2025-01-04（后端 + 测试），2026-01-07（前端）
 
 ---
 
@@ -223,60 +223,62 @@
 
 ##### Phase 1: 基础架构（2-3 天）
 
-- [ ] Skills 数据模型 ✨
-  - [ ] Drizzle Schema 定义
-    - [ ] skills 表（Skill 定义存储）
-    - [ ] agent_skills 表（Agent-Skill 关联）
-    - [ ] skill_executions 表（执行记录追踪）
-  - [ ] Zod schemas 验证
-    - [ ] SkillDefinitionSchema（参数、返回值验证）
-    - [ ] SkillExecutionSchema（执行请求验证）
-  - [ ] 数据库迁移
+- [x] Skills 数据模型 ✨
+  - [x] Drizzle Schema 定义
+    - [x] skills 表（Skill 定义存储）
+    - [x] agent_skills 表（Agent-Skill 关联）
+    - [x] skill_executions 表（执行记录追踪）
+  - [x] Zod schemas 验证
+    - [x] SkillDefinitionSchema（参数、返回值验证）
+    - [x] SkillExecutionSchema（执行请求验证）
+  - [x] 数据库迁移
     ```bash
     pnpm db:generate
     pnpm db:migrate
     ```
 
-- [ ] Skill Registry（技能注册表）
-  - [ ] SkillRegistry 核心类实现
-    - [ ] register(skill: SkillDefinition)
-    - [ ] get(skillId: string)
-    - [ ] list(category?: string)
-    - [ ] execute(skillId, params)
-  - [ ] 类型安全机制
-    - [ ] Zod schema 运行时验证
-    - [ ] TypeScript 泛型推导
-  - [ ] 错误处理
-    - [ ] SkillNotFoundError
-    - [ ] SkillValidationError
-    - [ ] SkillExecutionError
+- [x] Skill Registry（技能注册表）
+  - [x] SkillRegistry 核心类实现
+    - [x] register(skill: SkillDefinition)
+    - [x] get(skillId: string)
+    - [x] list(category?: string)
+    - [x] execute(skillId, params)
+  - [x] 类型安全机制
+    - [x] Zod schema 运行时验证
+    - [x] TypeScript 泛型推导
+  - [x] 错误处理
+    - [x] SkillNotFoundError
+    - [x] SkillValidationError
+    - [x] SkillExecutionError
 
-- [ ] 内置 Skills 实现（5 个基础 Skills）
-  - [ ] file.read - 读取文件内容
+- [x] 内置 Skills 实现（5 个基础 Skills）
+  - [x] file.read - 读取文件内容
     ```typescript
     parameters: { path: string; encoding?: string }
     returns: { content: string; size: number }
     ```
-  - [ ] file.write - 写入文件
+  - [x] file.write - 写入文件
     ```typescript
     parameters: { path: string; content: string }
     returns: { bytesWritten: number; path: string }
     ```
-  - [ ] code.analyze - 代码分析
+  - [x] code.analyze - 代码分析
     ```typescript
     parameters: { code: string; language: string }
     returns: { ast: AST; metrics: CodeMetrics }
     ```
-  - [ ] git.commit - Git 提交
+  - [x] git.commit - Git 提交
     ```typescript
     parameters: { message: string; files: string[] }
     returns: { commitHash: string; timestamp: string }
     ```
-  - [ ] git.diff - Git 差异
+  - [x] git.diff - Git 差异
     ```typescript
     parameters: { baseRef: string; targetRef: string }
     returns: { files: DiffFile[]; stats: DiffStats }
     ```
+
+**完成日期**: 2026-01-07（Phase 1）
 
 ##### Phase 2: Agent 集成（2-3 天）
 
@@ -581,11 +583,11 @@
 - [x] 核心模块测试（部分完成）
   - [x] Agent Schema 测试（38 个测试，100% 覆盖率）
   - [x] Agent 数据库操作测试（16 个测试）
-  - [ ] Skills System 测试
-    - [ ] SkillRegistry 单元测试
-    - [ ] Skill 执行引擎测试
-    - [ ] Zod Schema 验证测试
-    - [ ] 内置 Skills 功能测试
+  - [x] Skills System 测试
+    - [x] SkillRegistry 单元测试
+    - [x] Skill 执行引擎测试
+    - [x] Zod Schema 验证测试
+    - [x] 内置 Skills 功能测试
   - [ ] Workflow Engine 测试
   - [ ] Code Indexer 测试
   - [ ] Vector Search 测试
@@ -700,6 +702,21 @@ _暂无_
 
 ## 📝 变更记录
 
+### 2026-01-07
+- ✅ **Agent 前端界面完成**
+  - Agent 列表页、详情页、创建/编辑对话框、卡片组件已实现
+  - 前端接入 Agents API（查询、创建、编辑、删除）
+- ✅ **Skills Phase 1 落地完成**
+  - Skills 数据库 Schema + 迁移（skills / agent_skills / skill_executions）
+  - SkillRegistry 核心类 + 错误体系
+  - 5 个内置 Skills（file.read / file.write / code.analyze / git.commit / git.diff）
+  - Skills Zod schemas + 单元测试（registry / builtin / schema）
+  - 数据库外键约束集成测试覆盖
+- ✅ **修复 Web 构建报错（ioredis/dns）**
+  - Redis 模块拆分为 Node.js/浏览器双入口
+  - 客户端运行时避免引入 ioredis
+- **整体进度口径调整**: 统计口径改为包含子任务（42/98 → 129/349）
+
 ### 2025-01-05
 - ✅ **Agent Skills 系统架构规划完成**
   - **核心文档更新**:
@@ -796,22 +813,26 @@ _暂无_
 
 ## 🎯 下一步行动
 
-**本周重点**（2025-01-05 ~ 2025-01-12）:
+**本周重点**（2026-01-07 ~ 2026-01-14）:
 1. ✅ ~~完成项目初始化~~ (已完成 2024-12-27)
 2. ✅ ~~配置数据库和 ORM~~ (已完成 2024-12-28)
 3. ✅ ~~搭建 UI 基础组件~~ (已完成 2024-12-29)
 4. ✅ ~~Agent 后端 API + 测试~~ (已完成 2025-01-04)
 5. ✅ ~~Agent Skills 系统架构规划~~ (已完成 2025-01-05)
-6. **修复 Web 构建报错（ioredis/dns）** (Day 14) ← 当前任务
+6. ✅ ~~修复 Web 构建报错（ioredis/dns）~~ (Day 14)
    - 仅在 Node.js Runtime 使用 ioredis
    - 拆分 server-only 代码与客户端渲染代码
    - 验证 Next.js 构建通过
-7. **Agent Skills 系统 Phase 1 实施** (Day 15-17)
+7. ✅ ~~Agent Skills 系统 Phase 1 实施~~ (Day 15-17)
    - Skills 数据库 schema（3 个表）
    - SkillRegistry 核心类
    - 5 个内置 Skills（file.read, file.write, code.analyze, git.commit, git.diff）
    - Zod schemas 验证
    - 单元测试覆盖
+8. **Agent Skills 系统 Phase 2 实施** (Day 18-20) ← 当前任务
+   - Agent-Skill 绑定 API
+   - LLM Function Calling 转换器
+   - 执行引擎成本追踪接入
 
 **已完成基础设施**:
 - ✅ PostgreSQL (Supabase) + pgvector 扩展
@@ -821,23 +842,22 @@ _暂无_
 - ✅ 布局组件完整
 - ✅ Agent API（5 个端点）
 - ✅ Zod 验证 schemas
-- ✅ 测试框架（Vitest + 54 个测试）
+- ✅ 测试框架（Vitest + 78 个测试）
+- ✅ Skills 数据模型 + Registry + 内置 Skills
 - ⏳ OpenAI API Key（用于 embedding）
 - ⏳ Claude API Key（用于 LLM）
 - ⏳ Mastra 框架集成
 
 **优先级任务**:
-1. **P0**: 修复 Web 构建报错（ioredis/dns）（预计 0.5 天）
-2. **P0**: Skills 数据库 schema 定义和迁移（预计 0.5 天）
-3. **P0**: SkillRegistry 核心类实现（预计 1 天）
-4. **P0**: 5 个内置 Skills 开发（预计 1 天）
-5. **P0**: Skills 系统单元测试（预计 0.5 天）
-6. **P0**: Agent-Skill 绑定机制（预计 1 天）
-7. **P1**: Agent 前端界面开发（预计 2-3 天）
-8. **P1**: Mastra 集成和测试（预计 1-2 天）
+1. **P0**: Agent-Skill 绑定机制（预计 1 天）
+2. **P0**: LLM Function Calling 转换器（预计 1-2 天）
+3. **P0**: Skills 执行成本追踪接入（预计 0.5 天）
+4. **P1**: Skills API 端点（预计 1 天）
+5. **P1**: Skills 前端 UI（选择器 + 执行日志）（预计 2-3 天）
+6. **P1**: Mastra 集成和测试（预计 1-2 天）
 
 ---
 
 **维护者**: Agent Flow Team
 **更新频率**: 每日更新任务状态
-**最后更新**: 2026-01-05
+**最后更新**: 2026-01-07
