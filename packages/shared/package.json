@@ -7,7 +7,11 @@
     ".": "./src/index.ts",
     "./schemas": "./src/schemas/index.ts",
     "./skills": "./src/skills/index.ts",
-    "./redis": "./src/lib/redis.ts"
+    "./redis": {
+      "browser": "./src/lib/redis.browser.ts",
+      "node": "./src/lib/redis.server.ts",
+      "default": "./src/lib/redis.server.ts"
+    }
   },
   "scripts": {
     "type-check": "tsc --noEmit"
