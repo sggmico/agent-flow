@@ -35,7 +35,7 @@ export type SkillMode = (typeof SKILL_MODES)[number];
 /**
  * Skill 执行类型枚举
  */
-export const SKILL_HANDLER_TYPES = ['builtin', 'custom', 'remote'] as const;
+export const SKILL_HANDLER_TYPES = ['builtin', 'custom', 'remote', 'prompt'] as const;
 export type SkillHandlerType = (typeof SKILL_HANDLER_TYPES)[number];
 
 /**

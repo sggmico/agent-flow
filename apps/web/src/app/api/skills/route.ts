@@ -91,18 +91,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (validated.mode === 'tool' && !validated.handler) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'HANDLER_REQUIRED',
-            message: 'Tool 模式必须提供 handler',
-          },
-        },
-        { status: 400 },
-      );
-    }
+    const handlerType =
+      validated.mode === 'prompt' ? 'prompt' : (validated.handlerType ?? 'builtin');
 
     const created = await createSkill({
       skillId: validated.skillId,
@@ -114,7 +104,7 @@ export async function POST(request: NextRequest) {
       parameters: validated.parameters ?? {},
       returns: validated.returns ?? {},
       handler: validated.handler ?? (validated.mode === 'prompt' ? 'prompt' : ''),
-      handlerType: validated.handlerType,
+      handlerType,
       permissions: validated.permissions ?? [],
       estimatedCost: validated.estimatedCost ?? {},
       version: validated.version,
