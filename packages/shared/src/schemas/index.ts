@@ -3,4 +3,5 @@
  */
 
 export * from './agent';
+export * from './agent-skill';
 export * from './skill';

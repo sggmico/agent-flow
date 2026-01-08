@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   skillCategorySchema,
+  createSkillSchema,
   skillDefinitionSchema,
   skillExecutionSchema,
   skillHandlerTypeSchema,
+  skillModeSchema,
 } from '../skill';
 
 describe('Skill Schemas', () => {
@@ -29,6 +31,15 @@ describe('Skill Schemas', () => {
     });
   });
 
+  describe('skillModeSchema', () => {
+    it('应该接受有效的模式', () => {
+      const validModes = ['prompt', 'tool'];
+      for (const mode of validModes) {
+        expect(() => skillModeSchema.parse(mode)).not.toThrow();
+      }
+    });
+  });
+
   describe('skillDefinitionSchema', () => {
     const baseDefinition = {
       skillId: 'file.read',
@@ -43,6 +54,8 @@ describe('Skill Schemas', () => {
 
     it('应该填充默认值', () => {
       const result = skillDefinitionSchema.parse(baseDefinition);
+      expect(result.documentation).toBe('');
+      expect(result.mode).toBe('tool');
       expect(result.handlerType).toBe('builtin');
       expect(result.permissions).toEqual([]);
       expect(result.estimatedCost).toEqual({});
@@ -63,6 +76,19 @@ describe('Skill Schemas', () => {
     it('应该允许 createdBy 为空', () => {
       const result = skillDefinitionSchema.parse({ ...baseDefinition, createdBy: null });
       expect(result.createdBy).toBeNull();
+    });
+  });
+
+  describe('createSkillSchema', () => {
+    it('应该允许 prompt 模式缺省 handler', () => {
+      const result = createSkillSchema.parse({
+        skillId: 'prompt.example',
+        name: 'Prompt Example',
+        description: 'Prompt 模式 Skill',
+        mode: 'prompt',
+        category: 'other',
+      });
+      expect(result.mode).toBe('prompt');
     });
   });
 
