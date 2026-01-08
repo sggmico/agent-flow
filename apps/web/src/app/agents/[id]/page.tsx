@@ -5,10 +5,13 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import type { Agent } from '@agent-flow/database/schema';
-import { deleteAgent, getAgent } from '@agent-flow/shared';
+import { bindAgentSkill, deleteAgent, getAgent, getAgentSkills, unbindAgentSkill } from '@agent-flow/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Brain, Clock, Edit, Hash, Thermometer, Trash2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
@@ -20,6 +23,9 @@ export default function AgentDetailPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [skillIdInput, setSkillIdInput] = useState('');
+  const [priorityInput, setPriorityInput] = useState('');
+  const [configInput, setConfigInput] = useState('');
 
   const agentId = Number.parseInt(params?.id ?? '', 10);
 
@@ -28,6 +34,16 @@ export default function AgentDetailPage() {
     queryKey: ['agent', agentId],
     queryFn: () => getAgent(agentId),
     enabled: Number.isFinite(agentId), // 只有当 agentId 有效时才发起请求
+  });
+
+  const {
+    data: skillsData,
+    isLoading: isSkillsLoading,
+    error: skillsError,
+  } = useQuery({
+    queryKey: ['agent-skills', agentId],
+    queryFn: () => getAgentSkills(agentId),
+    enabled: Number.isFinite(agentId),
   });
 
   // 删除 mutation
@@ -54,6 +70,54 @@ export default function AgentDetailPage() {
     },
   });
 
+  const bindMutation = useMutation({
+    mutationFn: (payload: { agentId: number; skillId: string; priority?: number; config?: unknown }) =>
+      bindAgentSkill(payload.agentId, {
+        skillId: payload.skillId,
+        priority: payload.priority,
+        config:
+          payload.config && typeof payload.config === 'object'
+            ? (payload.config as Record<string, unknown>)
+            : undefined,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agent-skills', agentId] });
+      toast({
+        title: '绑定成功',
+        description: 'Skill 已绑定到当前 Agent',
+      });
+      setSkillIdInput('');
+      setPriorityInput('');
+      setConfigInput('');
+    },
+    onError: (error) => {
+      toast({
+        title: '绑定失败',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const unbindMutation = useMutation({
+    mutationFn: (payload: { agentId: number; skillId: string }) =>
+      unbindAgentSkill(payload.agentId, payload.skillId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agent-skills', agentId] });
+      toast({
+        title: '解绑成功',
+        description: 'Skill 已从 Agent 解绑',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: '解绑失败',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
   const handleEdit = () => {
     setEditDialogOpen(true);
   };
@@ -66,6 +130,56 @@ export default function AgentDetailPage() {
 
   const handleBack = () => {
     router.push('/agents');
+  };
+
+  const handleBindSkill = async () => {
+    const skillId = skillIdInput.trim();
+    if (!skillId) {
+      toast({
+        title: 'Skill ID 不能为空',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    let parsedConfig: unknown | undefined;
+    if (configInput.trim()) {
+      try {
+        parsedConfig = JSON.parse(configInput);
+      } catch (parseError) {
+        toast({
+          title: '配置格式错误',
+          description: parseError instanceof Error ? parseError.message : '请填写合法 JSON',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
+    const priority = priorityInput.trim()
+      ? Number.parseInt(priorityInput.trim(), 10)
+      : undefined;
+    if (priorityInput.trim() && (Number.isNaN(priority) || priority < 0)) {
+      toast({
+        title: '优先级无效',
+        description: '优先级需为非负整数',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    await bindMutation.mutateAsync({
+      agentId,
+      skillId,
+      priority,
+      config: parsedConfig,
+    });
+  };
+
+  const handleUnbindSkill = async (skillId: string) => {
+    if (window.confirm(`确定要解绑 Skill "${skillId}" 吗？`)) {
+      await unbindMutation.mutateAsync({ agentId, skillId });
+    }
   };
 
   // 处理无效的 agentId
@@ -141,6 +255,7 @@ export default function AgentDetailPage() {
           <TabsList>
             <TabsTrigger value="overview">概览</TabsTrigger>
             <TabsTrigger value="config">配置</TabsTrigger>
+            <TabsTrigger value="skills">Skills</TabsTrigger>
             <TabsTrigger value="executions">执行历史</TabsTrigger>
           </TabsList>
 
@@ -253,6 +368,127 @@ export default function AgentDetailPage() {
                     </div>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Skills 标签 */}
+          <TabsContent value="skills" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>已绑定 Skills</CardTitle>
+                <CardDescription>该 Agent 当前可用的技能列表</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-6 rounded-lg border border-border bg-muted/40 p-4">
+                  <div className="text-sm font-medium">绑定新 Skill</div>
+                  <div className="mt-4 grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="skill-id">Skill ID</Label>
+                      <Input
+                        id="skill-id"
+                        value={skillIdInput}
+                        onChange={(event) => setSkillIdInput(event.target.value)}
+                        placeholder="例如: file.read"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="skill-priority">优先级（可选）</Label>
+                      <Input
+                        id="skill-priority"
+                        value={priorityInput}
+                        onChange={(event) => setPriorityInput(event.target.value)}
+                        placeholder="例如: 10"
+                      />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="skill-config">配置（JSON，可选）</Label>
+                      <Textarea
+                        id="skill-config"
+                        value={configInput}
+                        onChange={(event) => setConfigInput(event.target.value)}
+                        placeholder='例如: {"maxSize": 1048576}'
+                        rows={4}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex justify-end">
+                    <Button onClick={handleBindSkill} disabled={bindMutation.isPending}>
+                      {bindMutation.isPending ? '绑定中...' : '绑定 Skill'}
+                    </Button>
+                  </div>
+                </div>
+
+                {isSkillsLoading && (
+                  <div className="text-center py-6 text-muted-foreground">加载中...</div>
+                )}
+
+                {skillsError && (
+                  <div className="text-center py-6 text-red-500">
+                    加载失败: {skillsError.message}
+                  </div>
+                )}
+
+                {!isSkillsLoading &&
+                  !skillsError &&
+                  (skillsData?.data.length ? (
+                    <div className="space-y-4">
+                      {skillsData.data.map((link) => (
+                        <div
+                          key={`${link.agentId}-${link.skillId}`}
+                          className="rounded-lg border border-border bg-card p-4"
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <div className="text-base font-semibold">{link.skill.name}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {link.skill.skillId}
+                              </div>
+                            </div>
+                            <div className="flex flex-wrap gap-2 text-xs">
+                              <span className="rounded-md bg-secondary px-2 py-1">
+                                {link.skill.category}
+                              </span>
+                              <span className="rounded-md bg-secondary px-2 py-1">
+                                {link.skill.handlerType}
+                              </span>
+                              {link.priority !== null && link.priority !== undefined && (
+                                <span className="rounded-md bg-secondary px-2 py-1">
+                                  优先级 {link.priority}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="mt-2 text-sm text-muted-foreground">
+                            {link.skill.description}
+                          </div>
+                          {link.config && (
+                            <div className="mt-3 rounded-md bg-muted p-3 text-sm">
+                              <div className="text-xs font-medium text-muted-foreground mb-1">
+                                配置
+                              </div>
+                              <pre className="whitespace-pre-wrap">
+                                {JSON.stringify(link.config, null, 2)}
+                              </pre>
+                            </div>
+                          )}
+                          <div className="mt-4 flex justify-end">
+                            <Button
+                              variant="outline"
+                              onClick={() => handleUnbindSkill(link.skillId)}
+                              disabled={unbindMutation.isPending}
+                            >
+                              解绑
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 text-muted-foreground">
+                      暂未绑定任何 Skill
+                    </div>
+                  ))}
               </CardContent>
             </Card>
           </TabsContent>
