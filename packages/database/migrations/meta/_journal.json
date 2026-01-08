@@ -29,6 +29,13 @@
       "when": 1767667006000,
       "tag": "0003_add_skill_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1767859046000,
+      "tag": "0004_skill_dual_mode",
+      "breakpoints": true
     }
   ]
 }

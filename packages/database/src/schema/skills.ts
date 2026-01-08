@@ -27,6 +27,12 @@ export const SKILL_CATEGORIES = [
 export type SkillCategory = (typeof SKILL_CATEGORIES)[number];
 
 /**
+ * Skill 模式枚举
+ */
+export const SKILL_MODES = ['prompt', 'tool'] as const;
+export type SkillMode = (typeof SKILL_MODES)[number];
+
+/**
  * Skill 执行类型枚举
  */
 export const SKILL_HANDLER_TYPES = ['builtin', 'custom', 'remote'] as const;
@@ -53,6 +59,8 @@ export const skills = pgTable('skills', {
   skillId: text('skill_id').notNull().unique(),
   name: text('name').notNull(),
   description: text('description').notNull(),
+  documentation: text('documentation').notNull().default(''),
+  mode: text('mode').notNull().$type<SkillMode>().default('tool'),
   category: text('category').notNull().$type<SkillCategory>(),
   parameters: jsonb('parameters').$type<Record<string, unknown>>().notNull().default({}),
   returns: jsonb('returns').$type<Record<string, unknown>>().notNull().default({}),
@@ -67,6 +75,7 @@ export const skills = pgTable('skills', {
   usageCount: integer('usage_count').default(0),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  lastCompiledAt: timestamp('last_compiled_at'),
 });
 
 /**
