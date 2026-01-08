@@ -21,7 +21,7 @@ export const skillModeSchema = z.enum(['prompt', 'tool']);
 /**
  * Skill 处理器类型枚举
  */
-export const skillHandlerTypeSchema = z.enum(['builtin', 'custom', 'remote']);
+export const skillHandlerTypeSchema = z.enum(['builtin', 'custom', 'remote', 'prompt']);
 
 /**
  * Skill 执行状态枚举
@@ -80,25 +80,51 @@ export const skillExecutionSchema = z.object({
 /**
  * Skill 创建 Schema（Prompt/Tool 双层并存）
  */
-export const createSkillSchema = z.object({
-  skillId: z.string().min(1, 'Skill ID 不能为空').max(100, 'Skill ID 不能超过 100 个字符'),
-  name: z.string().min(1, '名称不能为空').max(100, '名称不能超过 100 个字符'),
-  description: z.string().min(1, '描述不能为空').max(1000, '描述不能超过 1000 个字符'),
-  documentation: z.string().max(20000, '文档不能超过 20000 个字符').optional().default(''),
-  mode: skillModeSchema.default('tool'),
-  category: skillCategorySchema,
-  parameters: z.record(z.string(), z.unknown()).default({}),
-  returns: z.record(z.string(), z.unknown()).default({}),
-  handler: z.string().min(1, 'Handler 不能为空').optional(),
-  handlerType: skillHandlerTypeSchema.default('builtin'),
-  permissions: z.array(z.string()).default([]),
-  estimatedCost: skillCostSchema.default({}),
-  version: z.string().min(1).default('1.0.0'),
-  isActive: z.boolean().default(true),
-  isPublic: z.boolean().default(false),
-  createdBy: z.number().int().positive().nullable().optional(),
-  usageCount: z.number().int().nonnegative().default(0),
-});
+export const createSkillSchema = z
+  .object({
+    skillId: z.string().min(1, 'Skill ID 不能为空').max(100, 'Skill ID 不能超过 100 个字符'),
+    name: z.string().min(1, '名称不能为空').max(100, '名称不能超过 100 个字符'),
+    description: z.string().min(1, '描述不能为空').max(1000, '描述不能超过 1000 个字符'),
+    documentation: z.string().max(20000, '文档不能超过 20000 个字符').optional().default(''),
+    mode: skillModeSchema.default('tool'),
+    category: skillCategorySchema,
+    parameters: z.record(z.string(), z.unknown()).default({}),
+    returns: z.record(z.string(), z.unknown()).default({}),
+    handler: z.string().min(1, 'Handler 不能为空').optional(),
+    handlerType: skillHandlerTypeSchema.optional(),
+    permissions: z.array(z.string()).default([]),
+    estimatedCost: skillCostSchema.default({}),
+    version: z.string().min(1).default('1.0.0'),
+    isActive: z.boolean().default(true),
+    isPublic: z.boolean().default(false),
+    createdBy: z.number().int().positive().nullable().optional(),
+    usageCount: z.number().int().nonnegative().default(0),
+  })
+  .superRefine((value, ctx) => {
+    if (value.mode === 'tool' && !value.handler) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Tool 模式必须提供 handler',
+        path: ['handler'],
+      });
+    }
+
+    if (value.mode === 'prompt' && value.handlerType && value.handlerType !== 'prompt') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Prompt 模式的 handlerType 只能是 prompt',
+        path: ['handlerType'],
+      });
+    }
+
+    if (value.mode === 'tool' && value.handlerType === 'prompt') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Tool 模式不允许使用 prompt handlerType',
+        path: ['handlerType'],
+      });
+    }
+  });
 
 /**
  * Skill 列表查询 Schema
