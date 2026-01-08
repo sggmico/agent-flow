@@ -3,7 +3,7 @@
 > 开发进度追踪文档
 > 更新频率: 每日更新
 > 版本: v1.2
-> 最后更新: 2026-01-07
+> 最后更新: 2026-01-08
 
 ---
 
@@ -711,6 +711,16 @@ _暂无_
   - skills 增加 mode/documentation/lastCompiledAt 字段
   - 新增 Skills 列表/详情/创建 API
   - 新增 Skills 创建/列表 schemas 与 API client
+- ✅ **修复 Skills 双层并存评审问题**
+  - createSkillSchema 下沉 tool/prompt 条件校验
+  - Prompt 模式 handlerType 显式为 prompt
+  - Agent-Skill 集成测试清理范围修复
+  - spec.md 补齐验收标准/边界/非目标
+  - PR 模板与发布回滚说明补充
+- ✅ **测试与迁移验证**
+  - pnpm db:migrate
+  - pnpm test -- packages/shared/src/schemas/__tests__/skill.test.ts
+  - pnpm test -- packages/database/src/__tests__/agent-skills.integration.test.ts
 
 ### 2026-01-07
 - ✅ **Agent 前端界面完成**
@@ -870,4 +880,4 @@ _暂无_
 
 **维护者**: Agent Flow Team
 **更新频率**: 每日更新任务状态
-**最后更新**: 2026-01-07
+**最后更新**: 2026-01-08
