@@ -282,15 +282,15 @@
 
 ##### Phase 2: Agent 集成（2-3 天）
 
-- [ ] Agent-Skill 绑定机制
-  - [ ] Agent 绑定 Skills API
-    - [ ] POST /api/agents/:id/skills（绑定 Skill）
-    - [ ] GET /api/agents/:id/skills（查询已绑定）
-    - [ ] DELETE /api/agents/:id/skills/:skillId（解绑）
-  - [ ] 数据库操作层
-    - [ ] bindSkillToAgent(agentId, skillId)
-    - [ ] getAgentSkills(agentId)
-    - [ ] unbindSkill(agentId, skillId)
+- [x] Agent-Skill 绑定机制
+  - [x] Agent 绑定 Skills API
+    - [x] POST /api/agents/:id/skills（绑定 Skill）
+    - [x] GET /api/agents/:id/skills（查询已绑定）
+    - [x] DELETE /api/agents/:id/skills/:skillId（解绑）
+  - [x] 数据库操作层
+    - [x] bindSkillToAgent(agentId, skillId)
+    - [x] getAgentSkills(agentId)
+    - [x] unbindSkillFromAgent(agentId, skillId)
 
 - [ ] LLM Function Calling 集成
   - [ ] OpenAI Functions 转换器
@@ -314,9 +314,9 @@
 ##### Phase 3: 前端 UI（2-3 天）
 
 - [ ] Skills API 端点
-  - [ ] GET /api/skills?category=&search=（Skill 列表）
-  - [ ] GET /api/skills/:id（Skill 详情）
-  - [ ] POST /api/skills（创建自定义 Skill）
+  - [x] GET /api/skills?category=&search=（Skill 列表）
+  - [x] GET /api/skills/:id（Skill 详情）
+  - [x] POST /api/skills（创建自定义 Skill）
   - [ ] POST /api/skills/:id/execute（测试执行）
   - [ ] GET /api/skills/:id/executions（执行历史）
 
@@ -701,6 +701,16 @@ _暂无_
 ---
 
 ## 📝 变更记录
+
+### 2026-01-08
+- ✅ **Skills Phase 2 绑定机制完成**
+  - Agent-Skill 绑定 API（绑定/查询/解绑）
+  - Agent-Skill 数据库查询层
+  - Agent 详情页 Skills 绑定/解绑入口
+- ✅ **Skills 双层并存落地（Prompt/Tool）**
+  - skills 增加 mode/documentation/lastCompiledAt 字段
+  - 新增 Skills 列表/详情/创建 API
+  - 新增 Skills 创建/列表 schemas 与 API client
 
 ### 2026-01-07
 - ✅ **Agent 前端界面完成**
