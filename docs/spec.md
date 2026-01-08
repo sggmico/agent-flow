@@ -249,6 +249,32 @@ Agent Flow 是一个面向开发者的 **AI Agent 协作平台**，通过可视�
 - TypeScript 类型安全（Zod Schema 验证）
 - 数据库存储（skills, agent_skills, skill_executions 表）
 - OpenAI Function Calling 集成（Skill → OpenAI Tool 转换）
+- 分层边界：apps/web 仅调用 API；API 层依赖 packages/shared 校验与 packages/database 查询，不允许前端直连数据库
+
+#### Skills 双层并存（Prompt/Tool）验收标准
+
+**验收标准（可验证）**：
+1) POST /api/skills 支持 mode=prompt 且 documentation 可选；mode=tool 必须提供 handler。
+2) GET /api/skills/:id 返回 mode/documentation/lastCompiledAt 字段。
+3) Agent 详情页 Skills Tab 可绑定/解绑并刷新列表。
+4) 绑定不存在的 skillId 或 agentId 返回明确错误码。
+5) 迁移执行后 skills 表包含新增列且默认值正确。
+
+**做什么 / 不做什么**：
+- 做什么：支持 Prompt/Tool 双层并存的数据结构与基础 API。
+- 不做什么：不实现 LLM 编译器与执行引擎。
+
+**边界条件**：
+1) mode=tool 且 handler 为空返回 400。
+2) mode=prompt 时 handlerType 不进入 builtin 执行路径。
+3) skillId 重复创建返回 409。
+4) 绑定不存在的 skillId 返回 404。
+5) 解绑未绑定的 skillId 返回 404。
+6) priority 必须为非负整数。
+7) config 必须是合法 JSON。
+
+**非目标**：
+- 不包含 Skills 执行日志、成本统计、函数调用转换器。
 
 ---
 
@@ -401,6 +427,7 @@ Response 200:
       "skillId": "file.read",
       "name": "Read File",
       "description": "Read content from a file",
+      "mode": "tool",
       "category": "filesystem",
       "version": "1.0.0",
       "isActive": true,
@@ -426,6 +453,8 @@ Response 200:
   "skillId": "file.read",
   "name": "Read File",
   "description": "Read content from a file in the filesystem",
+  "documentation": "使用说明与参数示例",
+  "mode": "tool",
   "category": "filesystem",
   "parameters": {
     "type": "object",
@@ -446,7 +475,8 @@ Response 200:
   "estimatedCost": { "tokens": 0, "credits": 1 },
   "version": "1.0.0",
   "usageCount": 1234,
-  "createdAt": "2024-12-27T10:00:00Z"
+  "createdAt": "2024-12-27T10:00:00Z",
+  "lastCompiledAt": "2024-12-27T10:05:00Z"
 }
 ```
 
@@ -460,6 +490,7 @@ Content-Type: application/json
   "skillId": "custom.validator",
   "name": "Custom Validator",
   "description": "Validate custom data format",
+  "mode": "tool",
   "category": "other",
   "parameters": { /* Zod schema JSON */ },
   "returns": { /* Zod schema JSON */ },
@@ -650,6 +681,8 @@ interface Skill {
   skillId: string;               // 唯一标识（如 "file.read"）
   name: string;                  // 显示名称
   description: string;           // 功能描述
+  documentation: string;         // 说明文档（Markdown）
+  mode: 'prompt' | 'tool';       // 技能模式
   category: SkillCategory;       // 分类
 
   // 定义（JSON Schema 格式）
@@ -658,7 +691,7 @@ interface Skill {
 
   // 实现
   handler: string;               // 执行代码或引用路径
-  handlerType: 'builtin' | 'custom' | 'remote';
+  handlerType: 'builtin' | 'custom' | 'remote' | 'prompt';
 
   // 权限和成本
   permissions: string[];         // 如 ["filesystem:read", "network:request"]
@@ -677,6 +710,7 @@ interface Skill {
 
   createdAt: Date;
   updatedAt: Date;
+  lastCompiledAt?: Date;
 }
 
 type SkillCategory =
