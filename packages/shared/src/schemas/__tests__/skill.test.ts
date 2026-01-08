@@ -24,7 +24,7 @@ describe('Skill Schemas', () => {
 
   describe('skillHandlerTypeSchema', () => {
     it('应该接受有效的 handler 类型', () => {
-      const validTypes = ['builtin', 'custom', 'remote'];
+      const validTypes = ['builtin', 'custom', 'remote', 'prompt'];
       for (const type of validTypes) {
         expect(() => skillHandlerTypeSchema.parse(type)).not.toThrow();
       }
@@ -89,6 +89,31 @@ describe('Skill Schemas', () => {
         category: 'other',
       });
       expect(result.mode).toBe('prompt');
+    });
+
+    it('应该拒绝 tool 模式缺少 handler', () => {
+      expect(() =>
+        createSkillSchema.parse({
+          skillId: 'tool.example',
+          name: 'Tool Example',
+          description: 'Tool 模式 Skill',
+          mode: 'tool',
+          category: 'other',
+        }),
+      ).toThrow();
+    });
+
+    it('应该拒绝 prompt 模式使用非 prompt handlerType', () => {
+      expect(() =>
+        createSkillSchema.parse({
+          skillId: 'prompt.bad',
+          name: 'Prompt Bad',
+          description: 'Prompt 模式 Skill',
+          mode: 'prompt',
+          category: 'other',
+          handlerType: 'builtin',
+        }),
+      ).toThrow();
     });
   });
 
